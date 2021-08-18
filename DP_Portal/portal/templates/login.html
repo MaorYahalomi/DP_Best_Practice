@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    <link type="text/css" rel="stylesheet" href="static/styles/login.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <LINK rel="icon" type="image/x-icon" href="static/images/favicon.png">
+</head>
+<body>
+<a><img id="rlogo" class="center" src="/static/images/logo-inversed.png" alt=""></a>
+<div class="login-form">
+    <div class="booking-cta">
+        <h3 class="text-center">DP Configuration Portal</h3>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fa fa-user fa-lg"></i></span>
+            </div>
+            <input name="username" id="username" type="input" class="form-control" placeholder="Username" required="required" >
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group ">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fa fa-lock fa-lg" style="width:21px"></i></span>
+            </div>
+            <input name="password" id="password" type="password" class="form-control" placeholder="Password" required="required" >
+        </div>
+    </div> 
+    <div class="form-group">
+        <div class="input-group ">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fa fa-server fa-lg" style="width:21px"></i></span>
+            </div>
+            <input name="Vision_IP" id="vision" type="input" class="form-control" placeholder="Vision IP Address"
+                required="required">
+        </div>
+    </div>
+
+        <button id="login" type="submit" class="btn btn-primary mybtn" style="margin-top: 10px">Log in</button>
+    </div>
+ 
+</div>
+
+<script>
+var username = document.getElementById("username");
+var password = document.getElementById("password");
+var vision = document.getElementById("vision");
+var login = document.getElementById("login");
+
+
+login.addEventListener("click", function() {
+   
+    $.ajax({type: "POST", url: "/login", data: {'username': username.value, 'password': password.value, 'vision': vision.value }, success: function(result){
+        console.log(result)
+        if(result["status"] === "success"){
+            location.href = "/config.html";
+        } if(result["status"] == "error") {
+            $('[id="password"]').popover({content: "Invalid user name or password"})
+            $('[id="password"]').popover("show");
+        } 
+    }})
+})
+
+</script>
+</body>
+</html>

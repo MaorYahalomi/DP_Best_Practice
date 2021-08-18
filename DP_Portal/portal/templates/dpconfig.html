@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    <link type="text/css" rel="stylesheet" href="static/styles/config.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <LINK rel="icon" type="image/x-icon" href="static/images/favicon.png">
+</head>
+<body>
+<a><img id="rlogo" class="center" src="/static/images/logo-inversed.png" alt=""></a>
+
+<div class="list-group" style="width: 25%; margin: auto;">
+    <a href="#" class="list-group-item list-group-item-action active">
+        DefensePro Select
+    </a>
+    <a href="#" class="list-group-item list-group-item-action">DP1</a>
+    <a href="#" class="list-group-item list-group-item-action">DP2</a>
+</div>
+
+
+
+  
+
+<button id="login" type="submit" class="btn btn-primary mybtn" style="width:20%; margin-right: 100px;";>Submit</button>
+
+ 
+</div>
+
+<script>
+
+var username = document.getElementById("username");
+var password = document.getElementById("password");
+var vision = document.getElementById("vision");
+var login = document.getElementById("login");
+
+
+login.addEventListener("click", function() {
+   
+    $.ajax({type: "POST", url: "/login", data: {'username': username.value, 'password': password.value, 'vision': vision.value }, success: function(result){
+        console.log(result)
+        if(result["status"] === "success"){
+            location.href = "/index.html";
+        } if(result["status"] == "error") {
+            $('[id="password"]').popover({content: "Invalid user name or password"})
+            $('[id="password"]').popover("show");
+        } 
+    }})
+})
+
+</script>
+</body>
+</html>
