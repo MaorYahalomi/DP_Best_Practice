@@ -88,7 +88,17 @@ class Vision:
 			url, data=json.dumps(bdos_profile_body), verify=False)
 		print(response)
 
-
+	def net_class_confg(self):
+		url = f"https://10.213.17.49/mgmt/device/byip/10.213.17.52/config/rsBWMNetworkTable/mo/0/"
+		single_net_class_dic = {
+                    "rsBWMNetworkName": "10.25.25.0",
+				"rsBWMNetworkSubIndex": "0",
+				"rsBWMNetworkMode": "1",
+				"rsBWMNetworkAddress": "10.25.20.0",
+				"rsBWMNetworkMask": "255.255.255.240"}
+		response = self.session.post(
+			url, data=json.dumps(single_net_class_dic), verify=False)
+		print(response)
 
 # MAIN Prog #
 
@@ -99,9 +109,11 @@ config = {
 
          }
 
-# v1 = Vision(Vision_IP, Vision_user, Vision_password)
-# v1.lock_device()
+v1 = Vision(Vision_IP, Vision_user, Vision_password)
+v1.lock_device()
+v1.net_class_confg()
 # v1.bdos_profile_confg(config)
 
-v1 = Excel_Handler("sars", 10, 50)
-print(v1.fare())
+#v1 = Excel_Handler("sars", 10, 50)
+
+#print(v1.fare())\
