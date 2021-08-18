@@ -8,7 +8,7 @@ import time
 
 Vision_IP = "10.213.17.49"
 Vision_user = "radware"
-Vision_password = "radware1"
+Vision_password = "radware"
 
 class Vision:
 
