@@ -21,7 +21,15 @@ class Excel_Handler:
         #print(net_class_xl_format[index]["Network Name"])
         return net_class_xl_format[index]["Network Name"]
         
+    def get_network_address(self,index):
+        net_class_xl_format = self.read_table("Network Classes")
+        #print(net_class_xl_format[index]["Network Address"])
+        return net_class_xl_format[index]["Network Address"]
 
+    def get_network_mask(self,index):
+        net_class_xl_format = self.read_table("Network Classes")
+        #print(net_class_xl_format[index]["Mask"])
+        return net_class_xl_format[index]["Mask"]
 
     def check_multi_network(self):
         net_class_xl_format = self.read_table("Network Classes")
@@ -34,17 +42,7 @@ class Excel_Handler:
         #print(multi_net_dic)
         return multi_net_dic
 
-    def get_network_address(self):
-        net_class_xl_format = self.read_table("Network Classes")
-        print(net_class_xl_format)
-        #network_name = net_class_xl_format[index]["Network Name"]
-        # network_name_address = [net_class_xl_format[index]["Network Address"]
-        #                     for index in range(len(net_class_xl_format))]
-        # #return network_name_address
-        # print(network_name_address)
 
-    def get_network_mask(self):
-        net_class_xl_format = self.read_table("Network Classes")
         #network_name = net_class_xl_format[index]["Network Name"]
         network_name_mask = [net_class_xl_format[index]["Network Address"]
                                 for index in range(len(net_class_xl_format))]

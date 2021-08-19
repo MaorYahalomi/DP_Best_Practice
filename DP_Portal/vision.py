@@ -35,10 +35,10 @@ class Vision:
 			# Error handling to be completed
 			raise Error_handler(VISION_LOGIN_ERROR)
 
-	def lock_device(self): 
-			url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/10.213.17.52/lock"
-			response = self.session.post(url, verify=False)
-			print(response)
+	def lock_device(self,dp_ip): 
+		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
+		response = self.session.post(url, verify=False)
+		print(response)
 
 	def bdos_profile_confg(self,BDoS_config):
 		url = f"https://{self.ip}/mgmt/device/byip/10.213.17.52/config/rsNetFloodProfileTable/{BDoS_config['profile_name']}/"
@@ -89,9 +89,9 @@ class Vision:
 		print(response)
 
 	def net_class_confg(self):
-		url = f"https://10.213.17.49/mgmt/device/byip/10.213.17.52/config/rsBWMNetworkTable/mo/0/"
+		url = f"https://{self.ip}/mgmt/device/byip/10.213.17.52/config/rsBWMNetworkTable/mo/0/"
 		single_net_class_dic = {
-                    "rsBWMNetworkName": "10.25.25.0",
+                "rsBWMNetworkName": "10.25.25.0",
 				"rsBWMNetworkSubIndex": "0",
 				"rsBWMNetworkMode": "1",
 				"rsBWMNetworkAddress": "10.25.20.0",
