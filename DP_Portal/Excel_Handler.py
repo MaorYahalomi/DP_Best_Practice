@@ -49,20 +49,7 @@ class Excel_Handler:
         #return network_name_address
         print(network_name_mask)
 
-    def create_net_class_dic(self):
-        list_of_net = []
-        net_class_xl_format = self.read_table("Network Classes")       
-        # list_of_net_class_dict = [net_class_xl_format[index]["Subnet"]
-            #                           for index in range(len(net_class_xl_format))]
-            
-            # print(list_of_net_class_dict)
-            #print(net_class_xl_format[0]["Network Name"])
-        for index in range(len(net_class_xl_format)):
-            network_name = net_class_xl_format[index]["Network Name"]
-            network_subnet = net_class_xl_format[index]["Network Address"]
-            if network_name == "Mail":
-             list_of_net.append(create_single_net_dic(network_name, network_subnet, 0, "255.255.255.240"))
-        print(list_of_net[0])
+
 
 def create_single_net_dic(network_name, netowrk_subnet,index,net_mask):
 

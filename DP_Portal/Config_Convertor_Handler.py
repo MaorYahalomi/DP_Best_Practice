@@ -17,7 +17,7 @@ class Config_Convertor_Handler:
     
     def create_net_class_list(self):
 
-        list_of_net = []
+        net_class_list = []
         key_found = 0
         key_to_remove = 0
         sub_index = 0
@@ -45,22 +45,17 @@ class Config_Convertor_Handler:
                 multi_net_dic.pop(key_to_remove)
             key_found = 0
 
-            # if multi_sub_index == 2:
-            #     print("mail time")
-            #     print(sub_index)
-
             if sub_index < multi_sub_index:
-                # print(f"sub is {sub_index}")
-                # print(f"Multi is {multi_sub_index}")
-                list_of_net.append(create_single_net_dic(
+                net_class_list.append(create_single_net_dic(
                     network_name, network_subnet, sub_index, network_mask))
                 sub_index += 1
             else:
                 sub_index = 0
-                list_of_net.append(create_single_net_dic(
+                net_class_list.append(create_single_net_dic(
                     network_name, network_subnet, sub_index, network_mask))
                         
-        print(list_of_net)
+        #print(list_of_net)
+        return net_class_list
 
 def create_single_net_dic(network_name, netowrk_subnet, sub_index, net_mask):
 
@@ -74,13 +69,6 @@ def create_single_net_dic(network_name, netowrk_subnet, sub_index, net_mask):
     return single_net_class_dic
 
 
-
-
-d1 = Config_Convertor_Handler()
-#d1.print_table("Network Classes")
-d1.create_net_class_list()
-
-# a_dict = {'color': 'blue', 'color': 'd', 'fruit': 'apple', 'pet': 'dog'}
-# #a_dict.pop('fruit')
-# for key in a_dict.keys():
-#     print(a_dict[key])
+# d1 = Config_Convertor_Handler()
+# #d1.print_table("Network Classes")
+# d1.create_net_class_list()
