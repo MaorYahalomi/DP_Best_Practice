@@ -16,24 +16,10 @@ class Excel_Handler:
         return table
         #print(table_sheet)
 
-    # def get_network_name(self,index):
-    #     net_class_xl_format = self.read_table("Network Classes")
-    #     #print(net_class_xl_format[index]["Network Name"])
-    #     return net_class_xl_format[index]["Network Name"]
-
     def get_network_entry_details(self, index):
         net_class_xl_format = self.read_table("Network Classes")
         return net_class_xl_format[index]["Network Name"], net_class_xl_format[index]["Network Address"], net_class_xl_format[index]["Mask"]
 
-    # def get_network_address(self,index):
-    #     net_class_xl_format = self.read_table("Network Classes")
-    #     #print(net_class_xl_format[index]["Network Address"])
-    #     return net_class_xl_format[index]["Network Address"]
-
-    # def get_network_mask(self,index):
-    #     net_class_xl_format = self.read_table("Network Classes")
-    #     #print(net_class_xl_format[index]["Mask"])
-    #     return net_class_xl_format[index]["Mask"]
 
     def check_multi_network(self):
         net_class_xl_format = self.read_table("Network Classes")
@@ -53,7 +39,15 @@ class Excel_Handler:
         return BDoS_profile_name, BDoS_profile_BW
         print(net_class_xl_format[index]["Policy Name"])
         #return net_class_xl_format[index]["Network Name"]
+    
+    def get_DNS_profile_details(self,index):
+        net_class_xl_format = self.read_table("Policy Editor")
+        DNS_profile_name = net_class_xl_format[index]["Policy Name"]
+        DNS_Expected_QPS = net_class_xl_format[index]["DNS QPS"]
+        DNS_Max_QPS = net_class_xl_format[index]["DNS MAX QPS"]
+        return DNS_profile_name, DNS_Expected_QPS, DNS_Max_QPS
 
-v1 = Excel_Handler("Policy_Editor_micro_new_V7.xlsm")
+
+v1 = Excel_Handler("server_test.xlsm")
 #v1.create_net_class_dic()
 #v1.get_BDoS_profile_details()

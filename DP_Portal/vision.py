@@ -43,12 +43,20 @@ class Vision:
 		response = self.session.post(url, verify=False)
 		print(response)
 
-	def bdos_profile_config(self):
+	def BDoS_profile_config(self):
 		BDoS_config_file = self.config_file.create_BDoS_Profile_dic()
 		for index in range(len(BDoS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{BDoS_config_file[index]['rsNetFloodProfileName']}/"		
 			bdos_profile_body = json.dumps(BDoS_config_file[index])
 			response = self.session.post(url, data=bdos_profile_body, verify=False)
+			print(response)
+
+	def DNS_profile_config(self):
+		DNS_config_file = self.config_file.create_DNS_Profile_dic()
+		for index in range(len(DNS_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsDnsProtProfileTable/{DNS_config_file[index]['rsDnsProtProfileName']}/"
+			DNS_profile_body = json.dumps(DNS_config_file[index])
+			response = self.session.post(url, data=DNS_profile_body, verify=False)
 			print(response)
 
 	def net_class_config(self):
@@ -65,3 +73,4 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 #v1.lock_device()
 #v1.net_class_config()
 #v1.bdos_profile_config()
+v1.DNS_profile_config()

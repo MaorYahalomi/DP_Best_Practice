@@ -8,7 +8,7 @@ from Excel_Handler import Excel_Handler
 
 class Config_Convertor_Handler:
     def __init__(self):
-        self.configuration_book =  Excel_Handler("Policy_Editor_micro_new_V7.xlsm")
+        self.configuration_book = Excel_Handler("server_test.xlsm")
 
     def print_table(self,worksheet): 
         print(self.configuration_book.read_table(worksheet))
@@ -73,8 +73,22 @@ class Config_Convertor_Handler:
                 BDoS_Profile_list.append(
                     create_single_BDoS_dic(BDoS_name, int(BDos_BW)))
         
-        #print(BDoS_Profile_list)
         return BDoS_Profile_list
+    
+    def create_DNS_Profile_dic(self):
+        DNS_Profile_list = []
+        net_class_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(net_class_xl_format)):
+            DNS_profile_name, DNS_Expected_QPS, DNS_Max_QPS = self.configuration_book.get_DNS_profile_details(
+                index)
+            if math.isnan(DNS_Expected_QPS) == False:
+                print(DNS_Expected_QPS)
+                DNS_Profile_list.append(
+                    create_single_DNS_dic(DNS_profile_name, int(DNS_Expected_QPS), int(DNS_Max_QPS)))
+        
+        return DNS_Profile_list
 
 def create_single_BDoS_dic(BDoS_Profile_Name, BDoS_Profile_BW):
     bdos_profile_body = {
@@ -132,6 +146,33 @@ def create_single_net_dic(network_name, netowrk_subnet, sub_index, net_mask):
     }
     return single_net_class_dic
     
+def create_single_DNS_dic(DNS_Profile_Name, Expect_QPS, Allow_Max):
+
+    dns_profile_body = {
+        "rsDnsProtProfileName": f"{DNS_Profile_Name}_auto_DNS",
+        "rsDnsProtProfileAction": "1",
+        "rsDnsProtProfilePacketReportStatus": "1",
+        "rsDnsProtProfileDnsAStatus": "1",
+        "rsDnsProtProfileDnsMxStatus": "1",
+        "rsDnsProtProfileDnsPtrStatus": "1",
+        "rsDnsProtProfileDnsAaaaStatus": "1",
+        "rsDnsProtProfileDnsTextStatus": "1",
+        "rsDnsProtProfileDnsSoaStatus": "1",
+        "rsDnsProtProfileDnsNaptrStatus": "1",
+        "rsDnsProtProfileDnsSrvStatus": "1",
+        "rsDnsProtProfileDnsOtherStatus": "1",
+        "rsDnsProtProfileExpectedQps": Expect_QPS,
+        "rsDnsProtProfileMaxAllowQps": Allow_Max,
+        "rsDnsProtProfileManualTriggerActThresh": "0",
+        "rsDnsProtProfileManualTriggerActPeriod": "3",
+        "rsDnsProtProfileManualTriggerTermThresh": "0",
+        "rsDnsProtProfileManualTriggerTermPeriod": "3",
+        "rsDnsProtProfileManualTriggerMaxQpsTarget": "0",
+        "rsDnsProtProfileManualTriggerEscalatePeriod": "3",
+        "rsDnsProtProfileLearningSuppressionThreshold": "0",
+        "rsDnsProtProfileFootprintStrictness": "0"
+    }
+    return dns_profile_body
 
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
