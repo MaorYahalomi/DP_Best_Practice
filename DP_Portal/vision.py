@@ -10,6 +10,7 @@ import time
 Vision_IP = "10.213.17.49"
 Vision_user = "radware"
 Vision_password = "radware"
+DP_IP = "10.213.17.52"
 
 class Vision:
 
@@ -38,82 +39,29 @@ class Vision:
 			raise Error_handler(VISION_LOGIN_ERROR)
 
 	def lock_device(self,dp_ip): 
-		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
+		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{DP_IP}/lock"
 		response = self.session.post(url, verify=False)
 		print(response)
 
-	def bdos_profile_confg(self,BDoS_config):
-		url = f"https://{self.ip}/mgmt/device/byip/10.213.17.52/config/rsNetFloodProfileTable/{BDoS_config['profile_name']}/"
-		bdos_profile_body = {
-                            "rsNetFloodProfileName": BDoS_config['profile_name'],
-                      						"rsNetFloodProfilePacketReportStatus": "1",
-                      						"rsNetFloodProfileTransparentOptimization": "2",
-                      						"rsNetFloodProfileAction": "1",
-                      						"rsNetFloodProfileTcpSynStatus": "1",
-                      						"rsNetFloodProfileTcpFinAckStatus": "1",
-                      						"rsNetFloodProfileTcpRstStatus": "1",
-                      						"rsNetFloodProfileTcpSynAckStatus": "1",
-                      						"rsNetFloodProfileTcpFragStatus": "1",
-                      						"rsNetFloodProfileUdpStatus": "1",
-                      						"rsNetFloodProfileUdpFragStatus": "1",
-                      						"rsNetFloodProfileIcmpStatus": "1",
-                      						"rsNetFloodProfileIgmpStatus": "1",
-                      						"rsNetFloodProfileBandwidthIn": BDoS_config['BW_in'],
-                      						"rsNetFloodProfileBandwidthOut":  BDoS_config['BW_out'],
-                      						"rsNetFloodProfileTcpInQuota": "0",
-                      						"rsNetFloodProfileTcpOutQuota": "0",
-                      						"rsNetFloodProfileUdpInQuota": "0",
-                      						"rsNetFloodProfileUdpOutQuota": "0",
-                      						"rsNetFloodProfileUdpFragInQuota": "0",
-                      						"rsNetFloodProfileUdpFragOutQuota": "0",
-                      						"rsNetFloodProfileIcmpInQuota": "0",
-                      						"rsNetFloodProfileIcmpOutQuota": "0",
-                      						"rsNetFloodProfileIgmpInQuota": "0",
-                      						"rsNetFloodProfileIgmpOutQuota": "0",
-                      						"rsNetFloodProfileLevelOfReuglarzation": "2",
-                      						"rsNetFloodProfileUdpExcludedPorts": "None",
-                      						"rsNetFloodProfileAdvUdpDetection": "2",
-                      						"rsNetFloodProfileAdvUdpLearningPeriod": "2",
-                      						"rsNetFloodProfileAdvUdpAttackHighEdgeOverride": "0.0",
-                      						"rsNetFloodProfileAdvUdpAttackLowEdgeOverride": "0.0",
-                      						"rsNetFloodProfileBurstEnabled": "1",
-                      						"rsNetFloodProfileNoBurstTimeout": "30",
-                      						"rsNetFloodProfileOverMitigationStatus": "2",
-                      						"rsNetFloodProfileOverMitigationThreshold": "25",
-                      						"rsNetFloodProfileLearningSuppressionThreshold": "25",
-                      						"rsNetFloodProfileFootprintStrictness": "1",
-                      						"rsNetFloodProfileRateLimit": "0",
-                      						"rsNetFloodProfileUserDefinedRateLimit": "0",
-                      						"rsNetFloodProfileUserDefinedRateLimitUnit": "0"
-			}
-		response = self.session.post(
-			url, data=json.dumps(bdos_profile_body), verify=False)
-		print(response)
+	def bdos_profile_config(self):
+		BDoS_config_file = self.config_file.create_BDoS_Profile_dic()
+		for index in range(len(BDoS_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{BDoS_config_file[index]['rsNetFloodProfileName']}/"		
+			bdos_profile_body = json.dumps(BDoS_config_file[index])
+			response = self.session.post(url, data=bdos_profile_body, verify=False)
+			print(response)
 
-	def net_class_confg(self,):
+	def net_class_config(self):
 		networks_config = self.config_file.create_net_class_list()
-		# url = f"https://{self.ip}/mgmt/device/byip/10.213.17.52/config/rsBWMNetworkTable/mo/0/"
-		# single_net_class_dic = {
-        #         "rsBWMNetworkName": "10.25.25.0",
-		# 		"rsBWMNetworkSubIndex": "0",
-		# 		"rsBWMNetworkMode": "1",
-		# 		"rsBWMNetworkAddress": "10.25.20.0",
-		# 		"rsBWMNetworkMask": "255.255.255.240"}
-		# response = self.session.post(
-		# 	url, data=json.dumps(single_net_class_dic), verify=False)
-		# print(response)
-		print(networks_config)
+		for index in range (len(networks_config)):
+				url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsBWMNetworkTable/{networks_config[index]['rsBWMNetworkName']}/{networks_config[index]['rsBWMNetworkSubIndex']}/"
+				net_class_body = json.dumps(networks_config[index])
+				response = self.session.post(url, data=net_class_body, verify=False)
+				print(response)
 
 # MAIN Prog #
 
-config = {
-            "profile_name": "maor_bdos",
-    		"BW_in": "100000",
-  			"BW_out": "100000",
-
-         }
-
 v1 = Vision(Vision_IP, Vision_user, Vision_password)
 #v1.lock_device()
-v1.net_class_confg()
-# v1.bdos_profile_confg(config)
+#v1.net_class_config()
+#v1.bdos_profile_config()
