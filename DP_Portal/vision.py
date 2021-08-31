@@ -51,6 +51,14 @@ class Vision:
 			response = self.session.post(url, data=bdos_profile_body, verify=False)
 			print(response)
 
+	def SYN_profile_config(self):
+		BDoS_config_file = self.config_file.create_Syn_Profile_dic()
+		for index in range(len(BDoS_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{BDoS_config_file[index]['rsNetFloodProfileName']}/"
+			bdos_profile_body = json.dumps(BDoS_config_file[index])
+			response = self.session.post(url, data=bdos_profile_body, verify=False)
+			print(response)
+
 	def DNS_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
 		for index in range(len(DNS_config_file)):

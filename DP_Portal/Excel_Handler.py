@@ -20,8 +20,19 @@ class Excel_Handler:
         net_class_xl_format = self.read_table("Network Classes")
         return net_class_xl_format[index]["Network Name"], net_class_xl_format[index]["Network Address"], net_class_xl_format[index]["Mask"]
 
+    def get_application_type(self, index):
+        application_type_xl_format = self.read_table("Policy Editor")
+        application_type = application_type_xl_format[index]["Application Type"]
+        return application_type
+
+    def get_Policy_Name(self, index):
+        xl_format = self.read_table("Policy Editor")
+        policy_name = xl_format[index]["Policy Name"]
+        return policy_name
 
     def check_multi_network(self):
+        # Checks which networks class contains multiple entries,
+        # Retuern Dictoenry {Net_Name,count_of_entries}
         net_class_xl_format = self.read_table("Network Classes")
         network_name_list = [net_class_xl_format[index]["Network Name"]
                              for index in range(len(net_class_xl_format))]

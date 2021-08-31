@@ -90,9 +90,41 @@ class Config_Convertor_Handler:
         
         return DNS_Profile_list
 
+    def create_Syn_Profile_dic(self):
+        Syn_Profile_list = []
+        Syn_Profile_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(Syn_Profile_xl_format)):
+            application_type = self.configuration_book.get_application_type(
+                index)
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if math.isnan(application_type) == False:
+                print(application_type)
+                Syn_Profile_list.append(
+                    create_single_Syn_dic(Policy_Name, application_type))
+
+
+def create_single_Syn_dic(self, Syn_Profile_name, application_type_list):
+        syn_profile_body = {
+            "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
+            "rsIDSSynProfileTCPResetStatus": "1",
+            #Enables JavaScript Challenge:
+            "rsIDSSynProfilesParamsWebEnable": "2"
+        }
+
+        syn_paramaters_body = {
+            "rsIDSSynProfilesName": f"{Syn_Profile_name}_auto",
+            "rsIDSSynProfileServiceName": application_type_list,
+            "rsIDSSynProfileType": "3"
+        }
+
+        return syn_profile_body, syn_paramaters_body
+
 def create_single_BDoS_dic(BDoS_Profile_Name, BDoS_Profile_BW):
     bdos_profile_body = {
-        "rsNetFloodProfileName": f"{BDoS_Profile_Name}_auto",
+        "rsNetFloodProfileName": f"{BDoS_Profile_Name}_auto_BDoS",
   						"rsNetFloodProfilePacketReportStatus": "1",
   						"rsNetFloodProfileTransparentOptimization": "2",
   						"rsNetFloodProfileAction": "1",
@@ -178,3 +210,4 @@ d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
 #d1.create_net_class_list()
 #d1.create_BDoS_Profile_dic()
+d1.create_Syn_Profile_dic()
