@@ -51,13 +51,31 @@ class Vision:
 			response = self.session.post(url, data=bdos_profile_body, verify=False)
 			print(response)
 
-	def SYN_profile_config(self):
-		BDoS_config_file = self.config_file.create_Syn_Profile_dic()
-		for index in range(len(BDoS_config_file)):
-			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{BDoS_config_file[index]['rsNetFloodProfileName']}/"
-			bdos_profile_body = json.dumps(BDoS_config_file[index])
-			response = self.session.post(url, data=bdos_profile_body, verify=False)
+	def OOS_profile_config(self):
+		OOS_config_file = self.config_file.create_OOS_Profile_dic()
+		for index in range(len(OOS_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsStatefulProfileTable/{OOS_config_file[index]['rsSTATFULProfileName']}/"
+			oos_profile_body = json.dumps(OOS_config_file[index])
+			response = self.session.post(url, data=oos_profile_body, verify=False)
 			print(response)
+				
+
+	def SYN_profile_config(self):
+		SYN_config_file = self.config_file.create_Syn_Profile_dic()
+		#print(SYN_config_file[0])
+		for index in range(len(SYN_config_file)):
+				profile_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesParamsTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/"
+				application_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/{SYN_config_file[index][1]['rsIDSSynProfileServiceName']}/"
+				application_body = json.dumps(SYN_config_file[index][1])
+				syn_profile_body = json.dumps(SYN_config_file[index][0])
+
+				response_application = self.session.post(
+					application_url, data=application_body, verify=False)
+
+				response_profile = self.session.put(
+					profile_url, data=syn_profile_body, verify=False)
+
+				print(response_profile, response_application)
 
 	def DNS_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
@@ -75,10 +93,12 @@ class Vision:
 				response = self.session.post(url, data=net_class_body, verify=False)
 				print(response)
 
-# MAIN Prog #
+# MAIN Prog Tests#
 
 v1 = Vision(Vision_IP, Vision_user, Vision_password)
 #v1.lock_device()
 #v1.net_class_config()
 #v1.bdos_profile_config()
-v1.DNS_profile_config()
+#v1.DNS_profile_config()
+#v1.SYN_profile_config()
+v1.OOS_profile_config()

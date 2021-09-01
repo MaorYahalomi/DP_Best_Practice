@@ -1,4 +1,5 @@
 import pandas
+import pandas as pd
 from collections import Counter
 import requests
 import json
@@ -23,16 +24,25 @@ class Excel_Handler:
     def get_application_type(self, index):
         application_type_xl_format = self.read_table("Policy Editor")
         application_type = application_type_xl_format[index]["Application Type"]
-        return application_type
+        #Checks if the value is not NAN
+        if pd.isna(application_type) == False:
+            return application_type
+        else:
+            return False
 
     def get_Policy_Name(self, index):
         xl_format = self.read_table("Policy Editor")
         policy_name = xl_format[index]["Policy Name"]
+        if pd.isna(policy_name) == False:
+            return policy_name
+        else:
+            return False
         return policy_name
 
     def check_multi_network(self):
-        # Checks which networks class contains multiple entries,
-        # Retuern Dictoenry {Net_Name,count_of_entries}
+        #Function Description:
+            # Checks which networks class contains multiple entries,
+            # Retuern Dictoenry {Net_Name,count_of_entries}
         net_class_xl_format = self.read_table("Network Classes")
         network_name_list = [net_class_xl_format[index]["Network Name"]
                              for index in range(len(net_class_xl_format))]
