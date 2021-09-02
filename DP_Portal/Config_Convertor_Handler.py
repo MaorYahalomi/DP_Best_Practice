@@ -126,6 +126,70 @@ class Config_Convertor_Handler:
                    create_single_OOS_dic(Policy_Name))
         return OOS_Profile_list
 
+    def create_AS_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney AS Profile configuration
+
+        AS_Profile_list = []
+        AS_Profile_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(AS_Profile_xl_format)):
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+               AS_Profile_list.append(
+                   create_single_AS_dic(Policy_Name))
+        return AS_Profile_list
+
+    def create_ERT_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney ERT Profile configuration
+
+        ERT_Profile_list = []
+        ERT_Profile_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(ERT_Profile_xl_format)):
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+               ERT_Profile_list.append(
+                   create_single_ERT_dic(Policy_Name))
+        return ERT_Profile_list    
+
+    def create_GEO_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney GEO Profile configuration
+
+        GEO_Profile_list = []
+        GEO_Profile_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(GEO_Profile_xl_format)):
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+               GEO_Profile_list.append(
+                   create_single_GEO_dic(Policy_Name))
+        return GEO_Profile_list
+
+    def create_HTTPS_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney HTTPS Profile configuration
+
+        HTTPS_Profile_list = []
+        HTTPS_Profile_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(HTTPS_Profile_xl_format)):
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+               HTTPS_Profile_list.append(
+                   create_single_HTTPS_dic(Policy_Name))
+        return HTTPS_Profile_list
+
 def create_single_Syn_dic(Syn_Profile_name, application_type_list):
         
         syn_profile_body = {
@@ -142,6 +206,26 @@ def create_single_Syn_dic(Syn_Profile_name, application_type_list):
         }
 
         return syn_profile_body, syn_paramaters_body
+
+def create_single_AS_dic(AS_Profile_name):
+
+    as_profile_body = {
+        "rsIDSScanningProfilesName": f"{AS_Profile_name}_auto_as",
+        "rsIDSScanningProfilesTCPState": "1",
+        "rsIDSScanningProfilesUDPState": "1",
+        "rsIDSScanningProfilesICMPState": "1",
+        "rsIDSScanningProfilesAction": "1",
+        "rsIDSScanningProfilesPacketTraceStatus": "1",
+        "rsIDSScanningProfilesSensitivity": "2",
+        "rsIDSScanningProfilesProbesThreshold": "90",
+        "rsIDSScanningProfilesTrackingTime": "5",
+        "rsIDSScanningProfilesLowToHighBypass": "1",
+        "rsIDSScanningProfilesHighPortsResp": "2",
+        "rsIDSScanningProfilesSinglePort": "2",
+        "rsIDSScanningProfilesFootprintStrictness": "2"
+    }
+
+    return as_profile_body
 
 def create_single_OOS_dic(OOS_Profile_name):
 
@@ -245,6 +329,44 @@ def create_single_DNS_dic(DNS_Profile_Name, Expect_QPS, Allow_Max):
         "rsDnsProtProfileFootprintStrictness": "0"
     }
     return dns_profile_body
+
+def create_single_ERT_dic(ERT_Profile_name):
+    ERT_profile_body = {
+        "rsErtAttackersFeedProfileName": f"{ERT_Profile_name}_auto_ERT",
+        "rsErtAttackersFeedCatErtHighAction": "3",
+        "rsErtAttackersFeedCatErtMediumAction": "1",
+        "rsErtAttackersFeedCatErtLowAction": "1",
+        "rsErtAttackersFeedCatTorHighAction": "3",
+        "rsErtAttackersFeedCatTorMediumAction": "2",
+        "rsErtAttackersFeedCatTorLowAction": "2",
+        "rsErtAttackersFeedCatWebHighAction": "3",
+        "rsErtAttackersFeedCatWebMediumAction": "1",
+        "rsErtAttackersFeedCatWebLowAction": "1"
+    }
+    return ERT_profile_body
+
+def create_single_GEO_dic(GEO_Profile_name):
+    GEO_profile_body = {
+        "rsGeoProfileName": f"{GEO_Profile_name}_auto_GEO",
+        "rsGeoProfilePacketAction": "1",
+        "rsGeoProfileReportAction": "1"
+    }
+
+    return GEO_profile_body
+
+def create_single_HTTPS_dic(HTTPS_Profile_name):
+    HTTPS_profile_body = {
+        "rsHttpsFloodProfileName": f"{HTTPS_Profile_name}_auto_HTTPS",
+        "rsHttpsFloodProfileAction": "1",
+        "rsHttpsFloodProfileSelectiveChallenge": "1",
+        "rsHttpsFloodProfileRateLimitStatus": "1",
+        "rsHttpsFloodProfileRateLimit": "250",
+        "rsHttpsFloodProfileCollectiveChallenge": "2",
+        "rsHttpsFloodProfileFullSessionDecryption": "1",
+        "rsHttpsFloodProfileChallengeMethod": "1",
+        "rsHttpsFloodProfilePacketReporting": "1"
+    }
+    return HTTPS_profile_body
 
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")

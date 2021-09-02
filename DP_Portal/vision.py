@@ -1,3 +1,5 @@
+import urllib3
+urllib3.disable_warnings()
 from os import error
 from Excel_Handler import Excel_Handler
 from Config_Convertor_Handler import Config_Convertor_Handler
@@ -39,8 +41,14 @@ class Vision:
 			raise Error_handler(VISION_LOGIN_ERROR)
 
 	def lock_device(self,dp_ip): 
-		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{DP_IP}/lock"
+		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
 		response = self.session.post(url, verify=False)
+		print(response)
+
+	def update_policy(self,dp_ip):
+		self.lock_device(dp_ip)
+		update_url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/updatepolicies?"
+		response = self.session.post(update_url, verify=False)
 		print(response)
 
 	def BDoS_profile_config(self):
@@ -59,7 +67,6 @@ class Vision:
 			response = self.session.post(url, data=oos_profile_body, verify=False)
 			print(response)
 				
-
 	def SYN_profile_config(self):
 		SYN_config_file = self.config_file.create_Syn_Profile_dic()
 		#print(SYN_config_file[0])
@@ -85,6 +92,39 @@ class Vision:
 			response = self.session.post(url, data=DNS_profile_body, verify=False)
 			print(response)
 
+	def AS_profile_config(self):
+		AS_config_file = self.config_file.create_AS_Profile_dic()
+		for index in range(len(AS_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSScanningProfilesTable/{AS_config_file[index]['rsIDSScanningProfilesName']}/"
+			AS_profile_body = json.dumps(AS_config_file[index])
+			response = self.session.post(url, data=AS_profile_body, verify=False)
+			print(response)
+
+	def ERT_profile_config(self):
+		ERT_config_file = self.config_file.create_ERT_Profile_dic()
+		for index in range(len(ERT_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsErtAttackersFeedProfileTable/{ERT_config_file[index]['rsErtAttackersFeedProfileName']}/"
+			ERT_profile_body = json.dumps(ERT_config_file[index])
+			response = self.session.post(url, data=ERT_profile_body, verify=False)
+			print(response)
+
+	def GEO_profile_config(self):
+		GEO_config_file = self.config_file.create_GEO_Profile_dic()
+		for index in range(len(GEO_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsGeoProfileTable/{GEO_config_file[index]['rsGeoProfileName']}/"
+			GEO_profile_body = json.dumps(GEO_config_file[index])
+			response = self.session.post(url, data=GEO_profile_body, verify=False)
+			print(response)
+
+	def HTTPS_profile_config(self):
+		HTTPS_config_file = self.config_file.create_HTTPS_Profile_dic()
+		#print(HTTPS_config_file)
+		for index in range(len(HTTPS_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsHttpsFloodProfileTable/{HTTPS_config_file[index]['rsHttpsFloodProfileName']}/"
+			HTTPS_profile_body = json.dumps(HTTPS_config_file[index])
+			response = self.session.post(url, data=HTTPS_profile_body, verify=False)
+			print(response)
+
 	def net_class_config(self):
 		networks_config = self.config_file.create_net_class_list()
 		for index in range (len(networks_config)):
@@ -96,9 +136,15 @@ class Vision:
 # MAIN Prog Tests#
 
 v1 = Vision(Vision_IP, Vision_user, Vision_password)
-#v1.lock_device()
-#v1.net_class_config()
-#v1.bdos_profile_config()
-#v1.DNS_profile_config()
-#v1.SYN_profile_config()
-v1.OOS_profile_config()
+#Protection tests
+	#v1.lock_device()
+	#v1.net_class_config()
+	#v1.bdos_profile_config()
+	#v1.DNS_profile_config()
+	#v1.SYN_profile_config()
+	#v1.OOS_profile_config()
+	#v1.AS_profile_config()
+	#v1.ERT_profile_config()
+	#v1.GEO_profile_config()
+	#v1.update_policy(DP_IP)
+v1.HTTPS_profile_config()

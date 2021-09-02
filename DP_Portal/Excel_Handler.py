@@ -13,7 +13,7 @@ class Excel_Handler:
     def read_table(self,sheet):
         excel_data_df = pandas.read_excel(
             self.path, sheet_name=sheet)
-        table = excel_data_df.to_dict(orient='record')
+        table = excel_data_df.to_dict('records')
         return table
         #print(table_sheet)
 
@@ -37,7 +37,6 @@ class Excel_Handler:
             return policy_name
         else:
             return False
-        return policy_name
 
     def check_multi_network(self):
         #Function Description:
@@ -58,8 +57,6 @@ class Excel_Handler:
         BDoS_profile_name = net_class_xl_format[index]["Policy Name"]
         BDoS_profile_BW= net_class_xl_format[index]["Policy BW"]
         return BDoS_profile_name, BDoS_profile_BW
-        print(net_class_xl_format[index]["Policy Name"])
-        #return net_class_xl_format[index]["Network Name"]
     
     def get_DNS_profile_details(self,index):
         net_class_xl_format = self.read_table("Policy Editor")
