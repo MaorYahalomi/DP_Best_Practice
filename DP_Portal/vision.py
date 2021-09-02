@@ -118,7 +118,6 @@ class Vision:
 
 	def HTTPS_profile_config(self):
 		HTTPS_config_file = self.config_file.create_HTTPS_Profile_dic()
-		#print(HTTPS_config_file)
 		for index in range(len(HTTPS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsHttpsFloodProfileTable/{HTTPS_config_file[index]['rsHttpsFloodProfileName']}/"
 			HTTPS_profile_body = json.dumps(HTTPS_config_file[index])
@@ -132,6 +131,9 @@ class Vision:
 				net_class_body = json.dumps(networks_config[index])
 				response = self.session.post(url, data=net_class_body, verify=False)
 				print(response)
+
+	def Policy_Editor_config(self):
+		print("hi")
 
 # MAIN Prog Tests#
 

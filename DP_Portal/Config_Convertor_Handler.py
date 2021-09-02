@@ -185,11 +185,31 @@ class Config_Convertor_Handler:
         for index in range(len(HTTPS_Profile_xl_format)):
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
+            full_inspection_flag = self.configuration_book.get_Full_Inspection_Flag_Status(
+                index)
             if Policy_Name != False:
                HTTPS_Profile_list.append(
-                   create_single_HTTPS_dic(Policy_Name))
+                   create_single_HTTPS_dic(Policy_Name,full_inspection_flag))
         return HTTPS_Profile_list
 
+    def create_Protections_Per_Policy_dic(self):
+        # Maybe Delete
+        # Function Description:
+         # Creats List of protections per policy configuration
+
+        Protection_per_policy_list = []
+        protections_xl_format = self.configuration_book.read_table(
+            "Policy Editor")
+
+        for index in range(len(protections_xl_format)):
+            application_type = self.configuration_book.get_application_type(
+                index)
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if application_type == "HTTP":
+                self.create_OOS_Profile_dic()
+
+            
 def create_single_Syn_dic(Syn_Profile_name, application_type_list):
         
         syn_profile_body = {
@@ -354,7 +374,9 @@ def create_single_GEO_dic(GEO_Profile_name):
 
     return GEO_profile_body
 
-def create_single_HTTPS_dic(HTTPS_Profile_name):
+def create_single_HTTPS_dic(HTTPS_Profile_name,full_inspection_flag):
+   
+    Full_inspection_value = 1 if full_inspection_flag == "Yes" else 2
     HTTPS_profile_body = {
         "rsHttpsFloodProfileName": f"{HTTPS_Profile_name}_auto_HTTPS",
         "rsHttpsFloodProfileAction": "1",
@@ -362,12 +384,50 @@ def create_single_HTTPS_dic(HTTPS_Profile_name):
         "rsHttpsFloodProfileRateLimitStatus": "1",
         "rsHttpsFloodProfileRateLimit": "250",
         "rsHttpsFloodProfileCollectiveChallenge": "2",
-        "rsHttpsFloodProfileFullSessionDecryption": "1",
-        "rsHttpsFloodProfileChallengeMethod": "1",
+        "rsHttpsFloodProfileFullSessionDecryption": Full_inspection_value,
+        "rsHttpsFloodProfileChallengeMethod": "2",
         "rsHttpsFloodProfilePacketReporting": "1"
     }
     return HTTPS_profile_body
 
+
+
+
+def create_single_Policy_dic(Policy_Name):
+    Policy_body = {
+        "rsIDSNewRulesState": "1",
+        "rsIDSNewRulesAction": "1",
+        "rsIDSNewRulesPriority": "0",
+        "rsIDSNewRulesSource": "any",
+        "rsIDSNewRulesDestination": "net102",
+        "rsIDSNewRulesPortmask": "",
+        "rsIDSNewRulesDirection": "1",
+        "rsIDSNewRulesVlanTagGroup": "",
+        "rsIDSNewRulesProfileScanning": "maor_as",
+        "rsIDSNewRulesProfileNetflood": "Bdos_POC",
+        "rsIDSNewRulesProfileConlmt": "",
+        "rsIDSNewRulesProfilePpsRateLimit": "",
+        "rsIDSNewRulesProfileDNS": "",
+        "rsIDSNewRulesProfileErtAttackersFeed": "",
+        "rsIDSNewRulesProfileGeoFeed": "",
+        "rsIDSNewRulesProfileHttpsflood": "HTTPS_pro",
+        "rsIDSNewRulesProfileStateful": "maor1",
+        "rsIDSNewRulesProfileAppsec": "",
+        "rsIDSNewRulesProfileSynprotection": "",
+        "rsIDSNewRulesProfileTrafficFilters": "",
+        "rsIDSNewRulesCdnHandling": "2",
+        "rsIDSNewRulesCdnHandlingHttps": "1",
+        "rsIDSNewRulesCdnHandlingSig": "1",
+        "rsIDSNewRulesCdnHandlingSyn": "1",
+        "rsIDSNewRulesCdnHandlingTF": "1",
+        "rsIDSNewRulesCdnAction": "2",
+        "rsIDSNewRulesCdnTrueClientIpHdr": "1",
+        "rsIDSNewRulesCdnXForwardedForHdr": "1",
+        "rsIDSNewRulesCdnForwardedHdr": "2",
+        "rsIDSNewRulesCdnTrueIpCustomHdr": "",
+        "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
+        "rsIDSNewRulesPacketReportingEnforcement": "1"
+    }
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
 #d1.create_net_class_list()

@@ -38,6 +38,15 @@ class Excel_Handler:
         else:
             return False
 
+    def get_Full_Inspection_Flag_Status(self, index):
+        xl_format = self.read_table("Policy Editor")
+        policy_name = xl_format[index]["Is Service Behind CDN?"]
+        if pd.isna(policy_name) == False:
+            return policy_name
+        else:
+            return False
+
+
     def check_multi_network(self):
         #Function Description:
             # Checks which networks class contains multiple entries,
