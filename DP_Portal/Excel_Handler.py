@@ -15,7 +15,6 @@ class Excel_Handler:
             self.path, sheet_name=sheet)
         table = excel_data_df.to_dict('records')
         return table
-        #print(table_sheet)
 
     def get_network_entry_details(self, index):
         net_class_xl_format = self.read_table("Network Classes")

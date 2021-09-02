@@ -43,46 +43,65 @@ class Vision:
 	def lock_device(self,dp_ip): 
 		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
 		response = self.session.post(url, verify=False)
-		print(response)
+		print(f"Lock Device --> {response.status_code}")
 
 	def update_policy(self,dp_ip):
 		self.lock_device(dp_ip)
 		update_url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/updatepolicies?"
 		response = self.session.post(update_url, verify=False)
-		print(response)
+		print(f"Policy Update --> {response.status_code}")
 
 	def BDoS_profile_config(self):
 		BDoS_config_file = self.config_file.create_BDoS_Profile_dic()
+		#print(BDoS_config_file)
+		print("BDoS Profile Configurations\n")
 		for index in range(len(BDoS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{BDoS_config_file[index]['rsNetFloodProfileName']}/"		
 			bdos_profile_body = json.dumps(BDoS_config_file[index])
 			response = self.session.post(url, data=bdos_profile_body, verify=False)
-			print(response)
+			print(f"{BDoS_config_file[index]['rsNetFloodProfileName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
 
 	def OOS_profile_config(self):
 		OOS_config_file = self.config_file.create_OOS_Profile_dic()
+		print("OOS Profile Configurations\n")
 		for index in range(len(OOS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsStatefulProfileTable/{OOS_config_file[index]['rsSTATFULProfileName']}/"
 			oos_profile_body = json.dumps(OOS_config_file[index])
 			response = self.session.post(url, data=oos_profile_body, verify=False)
-			print(response)
+			print(f"{OOS_config_file[index]['rsSTATFULProfileName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
 				
 	def SYN_profile_config(self):
 		SYN_config_file = self.config_file.create_Syn_Profile_dic()
-		#print(SYN_config_file[0])
+		print("SYN Profile Configurations\n")
 		for index in range(len(SYN_config_file)):
-				profile_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesParamsTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/"
-				application_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/{SYN_config_file[index][1]['rsIDSSynProfileServiceName']}/"
-				application_body = json.dumps(SYN_config_file[index][1])
-				syn_profile_body = json.dumps(SYN_config_file[index][0])
+				profile_params_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesParamsTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/"
+				profile_create_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/{SYN_config_file[index][1]['rsIDSSynProfileServiceName']}/"
+				syn_profile_body = json.dumps(SYN_config_file[index][0]) 
+				profile_paramters = json.dumps(SYN_config_file[index][1])
 
-				response_application = self.session.post(
-					application_url, data=application_body, verify=False)
+				profile_create_res = self.session.post(
+					profile_create_url, data=profile_paramters, verify=False)
 
-				response_profile = self.session.put(
-					profile_url, data=syn_profile_body, verify=False)
+				response_params_update = self.session.put(
+					profile_params_url, data=syn_profile_body, verify=False)
 
-				print(response_profile, response_application)
+				print(f"{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}, Profile_Creation_Response --> {profile_create_res.status_code}")
+				print(f"{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}, Profile_Params_Update_Response --> {response_params_update.status_code}")
+		
+		print("\n"+"*"*30+"\n")
+
+	def SYN_App_Protecion_config(self):
+		
+		syn_app_dic = self.config_file.create_Syn_App_dic()
+		for index in range(len(syn_app_dic)):
+			app_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSYNAttackTable/{syn_app_dic[index]['rsIDSSYNAttackId']}/"
+			app_Body = json.dumps(syn_app_dic[index])
+			app_res = self.session.post(app_url, data=app_Body, verify=False)
+			print(f"{syn_app_dic[index]['rsIDSSYNAttackName']} App for syn Status: {app_res.status_code}")
+                    
+
 
 	def DNS_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
@@ -132,8 +151,15 @@ class Vision:
 				response = self.session.post(url, data=net_class_body, verify=False)
 				print(response)
 
-	def Policy_Editor_config(self):
-		print("hi")
+	def Protection_config(self):
+	 
+	#   self.lock_device(DP_IP)
+	#   self.BDoS_profile_config()
+	#   time.sleep(1.7)
+	#   self.OOS_profile_config()
+	#   time.sleep(1.7)
+	  self.SYN_profile_config()
+	  self.update_policy(DP_IP)
 
 # MAIN Prog Tests#
 
@@ -149,4 +175,8 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.ERT_profile_config()
 	#v1.GEO_profile_config()
 	#v1.update_policy(DP_IP)
-v1.HTTPS_profile_config()
+	#v1.HTTPS_profile_config()
+v1.Protection_config()
+#v1.SYN_App_Protecion_config()
+
+

@@ -1,3 +1,4 @@
+from typing import Protocol
 import pandas
 import requests
 import json
@@ -9,7 +10,9 @@ from Excel_Handler import Excel_Handler
 class Config_Convertor_Handler:
     def __init__(self):
         self.configuration_book = Excel_Handler("server_test.xlsm")
-
+        self.policy_editor_book = self.configuration_book.read_table("Policy Editor")
+        self.network_class_book = self.configuration_book.read_table(
+            "Network Classes")
     def print_table(self,worksheet): 
         print(self.configuration_book.read_table(worksheet))
 
@@ -25,7 +28,7 @@ class Config_Convertor_Handler:
         multi_sub_index = 0
 
         multi_net_dic = self.configuration_book.check_multi_network()
-        net_class_xl_format = self.configuration_book.read_table("Network Classes")
+        net_class_xl_format = self.network_class_book
         for index in range(len(net_class_xl_format)):
 
             # network_name = self.configuration_book.get_network_name(index)
@@ -62,31 +65,35 @@ class Config_Convertor_Handler:
 
     def create_BDoS_Profile_dic(self):
         BDoS_Profile_list = []
-        net_class_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # net_class_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        BDoS_Pro_xl_format = self.policy_editor_book
 
-        for index in range(len(net_class_xl_format)):
-            BDoS_name,BDos_BW = self.configuration_book.get_BDoS_profile_details(
+        for index in range(len(BDoS_Pro_xl_format)):
+            Policy_Name, BDos_BW = self.configuration_book.get_BDoS_profile_details(
                 index)
-            if math.isnan(BDos_BW) == False:
-                print(BDoS_name, BDos_BW)
-                BDoS_Profile_list.append(
-                    create_single_BDoS_dic(BDoS_name, int(BDos_BW)))
+            if Policy_Name != False:
+                if protection_per_application_check(self.configuration_book.get_application_type(index)):
+                    if math.isnan(BDos_BW) == False:
+                        BDoS_Profile_list.append(
+                            create_single_BDoS_dic(Policy_Name, int(BDos_BW)))
         
         return BDoS_Profile_list
     
     def create_DNS_Profile_dic(self):
         DNS_Profile_list = []
-        net_class_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
-
-        for index in range(len(net_class_xl_format)):
-            DNS_profile_name, DNS_Expected_QPS, DNS_Max_QPS = self.configuration_book.get_DNS_profile_details(
+        # net_class_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        Dns_Pro_xl_format = self.policy_editor_book
+        
+        for index in range(len(Dns_Pro_xl_format)):
+            Policy_Name, DNS_Expected_QPS, DNS_Max_QPS = self.configuration_book.get_DNS_profile_details(
                 index)
-            if math.isnan(DNS_Expected_QPS) == False:
-                print(DNS_Expected_QPS)
-                DNS_Profile_list.append(
-                    create_single_DNS_dic(DNS_profile_name, int(DNS_Expected_QPS), int(DNS_Max_QPS)))
+            if Policy_Name != False:
+                if math.isnan(DNS_Expected_QPS) == False:
+                    #print(DNS_Expected_QPS)
+                    DNS_Profile_list.append(
+                        create_single_DNS_dic(Policy_Name, int(DNS_Expected_QPS), int(DNS_Max_QPS)))
         
         return DNS_Profile_list
 
@@ -97,33 +104,44 @@ class Config_Convertor_Handler:
             # [1] - Syn Application paramater configuarion 
      
         Syn_Profile_list = []
-        Syn_Profile_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # Syn_Profile_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        Syn_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(Syn_Profile_xl_format)):
-            application_type = self.configuration_book.get_application_type(
+            Application_type = self.configuration_book.get_application_type(
                 index)
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
-            if application_type != False and Policy_Name != False:
-               Syn_Profile_list.append(
-                    create_single_Syn_dic(Policy_Name, application_type))
+            if Policy_Name != False:
+                if protection_per_application_check(self.configuration_book.get_application_type(index)):
+                        Syn_Profile_list.append(
+                                create_single_Syn_dic(Policy_Name, Application_type))
         return Syn_Profile_list
+
+    def create_Syn_App_dic(self):
+        Syn_App_list = []
+        #Syn_App_list.append(create_single_Syn_App("Mail"))
+        Syn_App_list.append(create_single_Syn_App("DNS"))
+
+        return Syn_App_list
 
     def create_OOS_Profile_dic(self):
         # Function Description:
             # Creats List of dictorney OOS Profile configuration
 
         OOS_Profile_list = []
-        OOS_Profile_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # OOS_Profile_xl_format = self.configuration_book.read_table(
+        #     "Policy self.policy_editor_book")
+        OOS_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(OOS_Profile_xl_format)):
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
             if Policy_Name != False:
-               OOS_Profile_list.append(
-                   create_single_OOS_dic(Policy_Name))
+                if protection_per_application_check(self.configuration_book.get_application_type(index)):
+                    OOS_Profile_list.append(
+                        create_single_OOS_dic(Policy_Name))
         return OOS_Profile_list
 
     def create_AS_Profile_dic(self):
@@ -131,8 +149,9 @@ class Config_Convertor_Handler:
         # Creats List of dictorney AS Profile configuration
 
         AS_Profile_list = []
-        AS_Profile_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # AS_Profile_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        AS_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(AS_Profile_xl_format)):
             Policy_Name = self.configuration_book.get_Policy_Name(
@@ -147,8 +166,9 @@ class Config_Convertor_Handler:
         # Creats List of dictorney ERT Profile configuration
 
         ERT_Profile_list = []
-        ERT_Profile_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # ERT_Profile_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        ERT_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(ERT_Profile_xl_format)):
             Policy_Name = self.configuration_book.get_Policy_Name(
@@ -163,8 +183,9 @@ class Config_Convertor_Handler:
         # Creats List of dictorney GEO Profile configuration
 
         GEO_Profile_list = []
-        GEO_Profile_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # GEO_Profile_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        GEO_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(GEO_Profile_xl_format)):
             Policy_Name = self.configuration_book.get_Policy_Name(
@@ -179,8 +200,9 @@ class Config_Convertor_Handler:
         # Creats List of dictorney HTTPS Profile configuration
 
         HTTPS_Profile_list = []
-        HTTPS_Profile_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # HTTPS_Profile_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        HTTPS_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(HTTPS_Profile_xl_format)):
             Policy_Name = self.configuration_book.get_Policy_Name(
@@ -198,8 +220,9 @@ class Config_Convertor_Handler:
          # Creats List of protections per policy configuration
 
         Protection_per_policy_list = []
-        protections_xl_format = self.configuration_book.read_table(
-            "Policy Editor")
+        # protections_xl_format = self.configuration_book.read_table(
+        #     "Policy Editor")
+        protections_xl_format = self.policy_editor_book
 
         for index in range(len(protections_xl_format)):
             application_type = self.configuration_book.get_application_type(
@@ -226,6 +249,36 @@ def create_single_Syn_dic(Syn_Profile_name, application_type_list):
         }
 
         return syn_profile_body, syn_paramaters_body
+
+def create_single_Syn_App(application_type):
+    
+    # For Clean DP Installtion
+    # if application_type == "Mail":
+    #     app_port = "smtp"
+    #     attack_id = "500001"
+    # if application_type == "DNS":
+    #     app_port = "dns"
+    #     attack_id = "500002"
+    
+    #Other for test:
+    if application_type == "Mail":
+        app_port = "smtp"
+        attack_id = "500013"
+    if application_type == "DNS":
+        app_port = "dns"
+        attack_id = "500013"
+
+    application_body = {
+        "rsIDSSYNAttackName": application_type,
+        "rsIDSSYNAttackId": attack_id,
+        "rsIDSSYNAttackSourceType": "3",
+        "rsIDSSYNDestinationAppPortGroup": app_port,
+        "rsIDSSYNAttackActivationThreshold": "2500",
+        "rsIDSSYNAttackTerminationThreshold": "1500",
+        "rsIDSSYNAttackRisk": "2"
+    }
+
+    return application_body
 
 def create_single_AS_dic(AS_Profile_name):
 
@@ -390,6 +443,11 @@ def create_single_HTTPS_dic(HTTPS_Profile_name,full_inspection_flag):
     }
     return HTTPS_profile_body
 
+def protection_per_application_check(application_type):
+    general_app_list = ["HTTP","HTTPS","FTP","SMTP"]
+    if application_type in general_app_list:
+        return True
+    return False
 
 
 
