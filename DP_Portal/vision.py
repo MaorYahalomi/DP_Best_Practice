@@ -53,7 +53,6 @@ class Vision:
 
 	def BDoS_profile_config(self):
 		BDoS_config_file = self.config_file.create_BDoS_Profile_dic()
-		#print(BDoS_config_file)
 		print("BDoS Profile Configurations\n")
 		for index in range(len(BDoS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{BDoS_config_file[index]['rsNetFloodProfileName']}/"		
@@ -101,8 +100,6 @@ class Vision:
 			app_res = self.session.post(app_url, data=app_Body, verify=False)
 			print(f"{syn_app_dic[index]['rsIDSSYNAttackName']} App for syn Status: {app_res.status_code}")
                     
-
-
 	def DNS_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
 		for index in range(len(DNS_config_file)):
@@ -113,11 +110,13 @@ class Vision:
 
 	def AS_profile_config(self):
 		AS_config_file = self.config_file.create_AS_Profile_dic()
+		print("Anti-Scan Profile Configurations\n")
 		for index in range(len(AS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSScanningProfilesTable/{AS_config_file[index]['rsIDSScanningProfilesName']}/"
 			AS_profile_body = json.dumps(AS_config_file[index])
 			response = self.session.post(url, data=AS_profile_body, verify=False)
-			print(response)
+			print(f"{AS_config_file[index]['rsIDSScanningProfilesName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
 
 	def ERT_profile_config(self):
 		ERT_config_file = self.config_file.create_ERT_Profile_dic()
@@ -149,23 +148,38 @@ class Vision:
 				url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsBWMNetworkTable/{networks_config[index]['rsBWMNetworkName']}/{networks_config[index]['rsBWMNetworkSubIndex']}/"
 				net_class_body = json.dumps(networks_config[index])
 				response = self.session.post(url, data=net_class_body, verify=False)
-				print(response)
+				print(f" Creating Network Class: {networks_config[index]['rsBWMNetworkName']} --> {response.status_code}")
+		time.sleep(1.0)
 
 	def Protection_config(self):
 	 
-	#   self.lock_device(DP_IP)
-	#   self.BDoS_profile_config()
-	#   time.sleep(1.7)
-	#   self.OOS_profile_config()
-	#   time.sleep(1.7)
+	 # self.lock_device(DP_IP)
+	  time.sleep(1.0)
+	  self.BDoS_profile_config()
+	  time.sleep(1.7)
+	  self.OOS_profile_config()
+	  time.sleep(1.7)
 	  self.SYN_profile_config()
+	  time.sleep(1.7)
+	  self.AS_profile_config()
+	  time.sleep(1.0)
 	  self.update_policy(DP_IP)
+
+	def Policy_config(self):
+		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		print("Policy Configurations\n")
+		for index in range(len(Policy_config_file)):
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
+			AS_profile_body = json.dumps(Policy_config_file[index])
+			response = self.session.post(url, data=AS_profile_body, verify=False)
+			print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
 
 # MAIN Prog Tests#
 
 v1 = Vision(Vision_IP, Vision_user, Vision_password)
 #Protection tests
-	#v1.lock_device()
+
 	#v1.net_class_config()
 	#v1.bdos_profile_config()
 	#v1.DNS_profile_config()
@@ -176,7 +190,10 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.GEO_profile_config()
 	#v1.update_policy(DP_IP)
 	#v1.HTTPS_profile_config()
+v1.lock_device(DP_IP)
+v1.net_class_config()
 v1.Protection_config()
+#v1.Policy_config()
 #v1.SYN_App_Protecion_config()
 
 

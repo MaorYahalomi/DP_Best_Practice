@@ -22,40 +22,39 @@ class Config_Convertor_Handler:
     def create_net_class_list(self):
 
         net_class_list = []
-        key_found = 0
+        key_found_sub_index = 0
         key_to_remove = 0
         sub_index = 0
         multi_sub_index = 0
 
         multi_net_dic = self.configuration_book.check_multi_network()
         net_class_xl_format = self.network_class_book
+        
         for index in range(len(net_class_xl_format)):
-
-            # network_name = self.configuration_book.get_network_name(index)
-            # network_subnet = self.configuration_book.get_network_address(index)
-            # network_mask = self.configuration_book.get_network_mask(index)
 
             network_name, network_subnet, network_mask = self.configuration_book.get_network_entry_details(index)
 
             for net_name_key in multi_net_dic.keys():
-                #print(net_name_key)
-                if network_name == net_name_key and key_found == 0:
-                    key_found = 1
+                #IF There is a netowrk call with multiple sub-indexes:
+                if network_name == net_name_key and key_found_sub_index == 0:
+                    key_found_sub_index = 1
                     sub_index = 0
                     multi_sub_index = multi_net_dic[net_name_key]
                     key_to_remove = net_name_key
                     print(multi_sub_index)
                     print(key_to_remove)
 
-            if key_found == 1:
+            if key_found_sub_index == 1:
+                #Remove the Entry with sub-indexes from dictionary.
                 multi_net_dic.pop(key_to_remove)
-            key_found = 0
+            key_found_sub_index = 0
 
             if sub_index < multi_sub_index:
                 net_class_list.append(create_single_net_dic(
                     network_name, network_subnet, sub_index, network_mask))
                 sub_index += 1
             else:
+                # Network Class with only 1 Entry:
                 sub_index = 0
                 net_class_list.append(create_single_net_dic(
                     network_name, network_subnet, sub_index, network_mask))
@@ -218,20 +217,23 @@ class Config_Convertor_Handler:
         # Maybe Delete
         # Function Description:
          # Creats List of protections per policy configuration
-
+        Policy_priorty = 300
         Protection_per_policy_list = []
-        # protections_xl_format = self.configuration_book.read_table(
-        #     "Policy Editor")
         protections_xl_format = self.policy_editor_book
-
         for index in range(len(protections_xl_format)):
             application_type = self.configuration_book.get_application_type(
                 index)
-            Policy_Name = self.configuration_book.get_Policy_Name(
-                index)
-            if application_type == "HTTP":
-                self.create_OOS_Profile_dic()
-
+            Policy_Name = self.configuration_book.get_Policy_Name(index)
+            dest_net_per_policy = protections_xl_format[index]["DST Networks Name"]
+            if Policy_Name != False:
+                policy_type = protection_per_policy_check(self.configuration_book.get_application_type(index))
+                if policy_type == "basic_app":
+                    #Basic Application Policy Section:
+                    Protection_per_policy_list.append(
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, dest_net_per_policy))
+            Policy_priorty +=5
+        #print(Protection_per_policy_list)
+        return Protection_per_policy_list
             
 def create_single_Syn_dic(Syn_Profile_name, application_type_list):
         
@@ -449,45 +451,101 @@ def protection_per_application_check(application_type):
         return True
     return False
 
+def protection_per_policy_check(application_type):
+    #Checks which application type the policy uses, and return the policy type
+    general_app_list = ["HTTP", "HTTPS", "FTP", "SMTP"]
+    if application_type in general_app_list:
+        app_type_response = "basic_app"
+        return app_type_response
+    if application_type =="DNS":
+        app_type_response = "DNS_app"
+        return app_type_response
+    if application_type == "Global":
+        app_type_response = "Global"
+        return app_type_response
+
+def create_single_Policy_dic(Policy_Name,policy_type,policy_Priority,Dest_net):
+    
+    if policy_type == "basic_app":
+        Policy_basic_body = {
+            "rsIDSNewRulesState": "1",
+            "rsIDSNewRulesName": f"{Policy_Name}_BP",
+            "rsIDSNewRulesAction": "1",
+            "rsIDSNewRulesPriority": policy_Priority,
+            "rsIDSNewRulesSource": "any",
+            "rsIDSNewRulesDestination": Dest_net,
+            "rsIDSNewRulesPortmask": "",
+            "rsIDSNewRulesDirection": "1",
+            "rsIDSNewRulesVlanTagGroup": "",
+            "rsIDSNewRulesProfileScanning": f"{Policy_Name}_auto_as",
+            "rsIDSNewRulesProfileNetflood": f"{Policy_Name}_auto_BDoS",
+            "rsIDSNewRulesProfileConlmt": "",
+            "rsIDSNewRulesProfilePpsRateLimit": "",
+            "rsIDSNewRulesProfileDNS": "",
+            "rsIDSNewRulesProfileErtAttackersFeed": "",
+            "rsIDSNewRulesProfileGeoFeed": "",
+            "rsIDSNewRulesProfileHttpsflood": "",
+            "rsIDSNewRulesProfileStateful":  f"{Policy_Name}_auto_oos",
+            "rsIDSNewRulesProfileAppsec": "",
+            "rsIDSNewRulesProfileSynprotection":  f"{Policy_Name}_auto_syn",
+            "rsIDSNewRulesProfileTrafficFilters": "",
+            "rsIDSNewRulesCdnHandling": "2",
+            "rsIDSNewRulesCdnHandlingHttps": "1",
+            "rsIDSNewRulesCdnHandlingSig": "1",
+            "rsIDSNewRulesCdnHandlingSyn": "1",
+            "rsIDSNewRulesCdnHandlingTF": "1",
+            "rsIDSNewRulesCdnAction": "2",
+            "rsIDSNewRulesCdnTrueClientIpHdr": "1",
+            "rsIDSNewRulesCdnXForwardedForHdr": "1",
+            "rsIDSNewRulesCdnForwardedHdr": "2",
+            "rsIDSNewRulesCdnTrueIpCustomHdr": "",
+            "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
+            "rsIDSNewRulesPacketReportingEnforcement": "1"
+        }
+    
+        return Policy_basic_body
+    
+    if policy_type == "DNS_app":
+        Policy_DNS_body= {
+            "rsIDSNewRulesState": "1",
+            "rsIDSNewRulesAction": "1",
+            "rsIDSNewRulesPriority": policy_Priority,
+            "rsIDSNewRulesSource": "any",
+            "rsIDSNewRulesDestination": "",
+            "rsIDSNewRulesPortmask": "",
+            "rsIDSNewRulesDirection": "1",
+            "rsIDSNewRulesVlanTagGroup": "",
+            "rsIDSNewRulesProfileScanning": "maor_as",
+            "rsIDSNewRulesProfileNetflood": "Bdos_POC",
+            "rsIDSNewRulesProfileConlmt": "",
+            "rsIDSNewRulesProfilePpsRateLimit": "",
+            "rsIDSNewRulesProfileDNS": "",
+            "rsIDSNewRulesProfileErtAttackersFeed": "",
+            "rsIDSNewRulesProfileGeoFeed": "",
+            "rsIDSNewRulesProfileHttpsflood": "HTTPS_pro",
+            "rsIDSNewRulesProfileStateful": "maor1",
+            "rsIDSNewRulesProfileAppsec": "",
+            "rsIDSNewRulesProfileSynprotection": f"{Policy_Name}_auto_syn",
+            "rsIDSNewRulesProfileTrafficFilters": "",
+            "rsIDSNewRulesCdnHandling": "2",
+            "rsIDSNewRulesCdnHandlingHttps": "1",
+            "rsIDSNewRulesCdnHandlingSig": "1",
+            "rsIDSNewRulesCdnHandlingSyn": "1",
+            "rsIDSNewRulesCdnHandlingTF": "1",
+            "rsIDSNewRulesCdnAction": "2",
+            "rsIDSNewRulesCdnTrueClientIpHdr": "1",
+            "rsIDSNewRulesCdnXForwardedForHdr": "1",
+            "rsIDSNewRulesCdnForwardedHdr": "2",
+            "rsIDSNewRulesCdnTrueIpCustomHdr": "",
+            "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
+            "rsIDSNewRulesPacketReportingEnforcement": "1"
+        }
+        return Policy_DNS_body
 
 
-def create_single_Policy_dic(Policy_Name):
-    Policy_body = {
-        "rsIDSNewRulesState": "1",
-        "rsIDSNewRulesAction": "1",
-        "rsIDSNewRulesPriority": "0",
-        "rsIDSNewRulesSource": "any",
-        "rsIDSNewRulesDestination": "net102",
-        "rsIDSNewRulesPortmask": "",
-        "rsIDSNewRulesDirection": "1",
-        "rsIDSNewRulesVlanTagGroup": "",
-        "rsIDSNewRulesProfileScanning": "maor_as",
-        "rsIDSNewRulesProfileNetflood": "Bdos_POC",
-        "rsIDSNewRulesProfileConlmt": "",
-        "rsIDSNewRulesProfilePpsRateLimit": "",
-        "rsIDSNewRulesProfileDNS": "",
-        "rsIDSNewRulesProfileErtAttackersFeed": "",
-        "rsIDSNewRulesProfileGeoFeed": "",
-        "rsIDSNewRulesProfileHttpsflood": "HTTPS_pro",
-        "rsIDSNewRulesProfileStateful": "maor1",
-        "rsIDSNewRulesProfileAppsec": "",
-        "rsIDSNewRulesProfileSynprotection": "",
-        "rsIDSNewRulesProfileTrafficFilters": "",
-        "rsIDSNewRulesCdnHandling": "2",
-        "rsIDSNewRulesCdnHandlingHttps": "1",
-        "rsIDSNewRulesCdnHandlingSig": "1",
-        "rsIDSNewRulesCdnHandlingSyn": "1",
-        "rsIDSNewRulesCdnHandlingTF": "1",
-        "rsIDSNewRulesCdnAction": "2",
-        "rsIDSNewRulesCdnTrueClientIpHdr": "1",
-        "rsIDSNewRulesCdnXForwardedForHdr": "1",
-        "rsIDSNewRulesCdnForwardedHdr": "2",
-        "rsIDSNewRulesCdnTrueIpCustomHdr": "",
-        "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
-        "rsIDSNewRulesPacketReportingEnforcement": "1"
-    }
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
 #d1.create_net_class_list()
 #d1.create_BDoS_Profile_dic()
 #d1.create_Syn_Profile_dic()
+d1.create_Protections_Per_Policy_dic()
