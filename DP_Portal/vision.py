@@ -102,11 +102,13 @@ class Vision:
                     
 	def DNS_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
+		print("DNS Profile Configurations\n")
 		for index in range(len(DNS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsDnsProtProfileTable/{DNS_config_file[index]['rsDnsProtProfileName']}/"
 			DNS_profile_body = json.dumps(DNS_config_file[index])
 			response = self.session.post(url, data=DNS_profile_body, verify=False)
-			print(response)
+			print(f"{DNS_config_file[index]['rsDnsProtProfileName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
 
 	def AS_profile_config(self):
 		AS_config_file = self.config_file.create_AS_Profile_dic()
@@ -144,6 +146,7 @@ class Vision:
 
 	def net_class_config(self):
 		networks_config = self.config_file.create_net_class_list()
+		print("Network Class Configurations\n")
 		for index in range (len(networks_config)):
 				url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsBWMNetworkTable/{networks_config[index]['rsBWMNetworkName']}/{networks_config[index]['rsBWMNetworkSubIndex']}/"
 				net_class_body = json.dumps(networks_config[index])
@@ -153,8 +156,10 @@ class Vision:
 
 	def Protection_config(self):
 	 
-	 # self.lock_device(DP_IP)
+	  self.lock_device(DP_IP)
 	  time.sleep(1.0)
+	  self.DNS_profile_config()
+	  time.sleep(1.7)
 	  self.BDoS_profile_config()
 	  time.sleep(1.7)
 	  self.OOS_profile_config()
@@ -169,10 +174,11 @@ class Vision:
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
 		print("Policy Configurations\n")
 		for index in range(len(Policy_config_file)):
-			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
-			AS_profile_body = json.dumps(Policy_config_file[index])
-			response = self.session.post(url, data=AS_profile_body, verify=False)
-			print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+			if index == 2:
+				url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
+				AS_profile_body = json.dumps(Policy_config_file[index])
+				response = self.session.post(url, data=AS_profile_body, verify=False)
+				print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
 # MAIN Prog Tests#
@@ -190,10 +196,10 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.GEO_profile_config()
 	#v1.update_policy(DP_IP)
 	#v1.HTTPS_profile_config()
-v1.lock_device(DP_IP)
+# v1.lock_device(DP_IP)
 v1.net_class_config()
 v1.Protection_config()
-#v1.Policy_config()
+v1.Policy_config()
 #v1.SYN_App_Protecion_config()
 
 
