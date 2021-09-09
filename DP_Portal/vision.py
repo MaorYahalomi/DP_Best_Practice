@@ -44,6 +44,7 @@ class Vision:
 		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
 		response = self.session.post(url, verify=False)
 		print(f"Lock Device --> {response.status_code}")
+		print("\n"+"*"*10+"\n")
 
 	def update_policy(self,dp_ip):
 		self.lock_device(dp_ip)
@@ -152,33 +153,33 @@ class Vision:
 				net_class_body = json.dumps(networks_config[index])
 				response = self.session.post(url, data=net_class_body, verify=False)
 				print(f" Creating Network Class: {networks_config[index]['rsBWMNetworkName']} --> {response.status_code}")
-		time.sleep(1.0)
+		time.sleep(2.0)
+		print("\n"+"*"*30+"\n")
 
 	def Protection_config(self):
 	 
 	  self.lock_device(DP_IP)
-	  time.sleep(1.0)
+	  time.sleep(1.5)
 	  self.DNS_profile_config()
-	  time.sleep(1.7)
+	  time.sleep(2.0)
 	  self.BDoS_profile_config()
-	  time.sleep(1.7)
+	  time.sleep(2.0)
 	  self.OOS_profile_config()
-	  time.sleep(1.7)
+	  time.sleep(2.0)
 	  self.SYN_profile_config()
-	  time.sleep(1.7)
+	  time.sleep(2.0)
 	  self.AS_profile_config()
-	  time.sleep(1.0)
+	  time.sleep(2.0)
 	  self.update_policy(DP_IP)
 
 	def Policy_config(self):
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
 		print("Policy Configurations\n")
 		for index in range(len(Policy_config_file)):
-			if index == 2:
-				url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
-				AS_profile_body = json.dumps(Policy_config_file[index])
-				response = self.session.post(url, data=AS_profile_body, verify=False)
-				print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
+			AS_profile_body = json.dumps(Policy_config_file[index])
+			response = self.session.post(url, data=AS_profile_body, verify=False)
+			print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
 # MAIN Prog Tests#
@@ -196,7 +197,7 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.GEO_profile_config()
 	#v1.update_policy(DP_IP)
 	#v1.HTTPS_profile_config()
-# v1.lock_device(DP_IP)
+v1.lock_device(DP_IP)
 v1.net_class_config()
 v1.Protection_config()
 v1.Policy_config()
