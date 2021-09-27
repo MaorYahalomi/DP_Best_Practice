@@ -62,6 +62,26 @@ class Vision:
 			print(f"{BDoS_config_file[index]['rsNetFloodProfileName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
+	def DNS_SIG_config(self):
+		DNS_custom_config_file = self.config_file.create_Singature_Profile_dic()
+		if DNS_custom_config_file:				
+			print("DNS Custom Profile Configurations\n")
+			for index in range(len(DNS_custom_config_file)):
+				url_dns_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']}/1/Services/Network%20Services-DNS/"
+				url_dns_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{DNS_custom_config_file[index][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
+				dns_service_body = json.dumps(DNS_custom_config_file[index][0])
+				dns_complex_body = json.dumps(DNS_custom_config_file[index][1])
+				response = self.session.post(
+					url_dns_service, data=dns_service_body, verify=False)
+				response = self.session.post(
+					url_dns_complex, data=dns_complex_body, verify=False)
+
+				print(
+					f"DNS:Service : {DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+				print(
+					f"DNS:Complex :{DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+			print("\n"+"*"*30+"\n")
+
 	def OOS_profile_config(self):
 		OOS_config_file = self.config_file.create_OOS_Profile_dic()
 		print("OOS Profile Configurations\n")
@@ -161,16 +181,19 @@ class Vision:
 	  self.lock_device(DP_IP)
 	  time.sleep(1.5)
 	  self.DNS_profile_config()
-	  time.sleep(2.0)
+	  time.sleep(3.0)
 	  self.BDoS_profile_config()
-	  time.sleep(2.0)
+	  time.sleep(3.0)
 	  self.OOS_profile_config()
-	  time.sleep(2.0)
+	  time.sleep(3.0)
 	  self.SYN_profile_config()
-	  time.sleep(2.0)
+	  time.sleep(3.0)
 	  self.AS_profile_config()
-	  time.sleep(2.0)
+	  time.sleep(3.0)
+	  self.DNS_SIG_config()
+	  time.sleep(3.0)
 	  self.update_policy(DP_IP)
+
 
 	def Policy_config(self):
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
@@ -201,6 +224,6 @@ v1.lock_device(DP_IP)
 v1.net_class_config()
 v1.Protection_config()
 v1.Policy_config()
-#v1.SYN_App_Protecion_config()
+v1.update_policy(DP_IP)
 
 

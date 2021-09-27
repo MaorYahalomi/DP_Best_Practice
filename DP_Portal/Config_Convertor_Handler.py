@@ -207,11 +207,14 @@ class Config_Convertor_Handler:
         Sig_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(Sig_Profile_xl_format)):
+            Application_type = self.configuration_book.get_application_type(
+                index)
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
             if Policy_Name != False:
-               Sig_Profile_list.append(
-                   create_custom_signature(Policy_Name))
+                if Application_type == "DNS":
+                    Sig_Profile_list.append(
+                        create_custom_signature(Policy_Name, Application_type))
         return Sig_Profile_list
         
     def create_HTTPS_Profile_dic(self):
@@ -239,7 +242,7 @@ class Config_Convertor_Handler:
         # Creats List of protections per policy configuration
         # basic app = ["HTTP", "HTTPS", "FTP", "SMTP"]
         Policy_priorty = 300
-        signature_list = ["DoS-All", "Corp-DMZ-Web", "Corp-DMZ-Mail", "dns_custom_profile"]
+        signature_list = ["DoS-All", "Corp-DMZ-Web", "Corp-DMZ-Mail"]
         Protection_per_policy_list = []
         protections_xl_format = self.policy_editor_book
         for index in range(len(protections_xl_format)):
@@ -257,7 +260,7 @@ class Config_Convertor_Handler:
                     elif application_type == "SMTP":
                         signature_selected = signature_list[2]
                     elif application_type == "DNS":
-                        signature_selected = signature_list[3]
+                        signature_selected = f"{Policy_Name}_dns_cust"
                     elif application_type == "Global": 
                         signature_selected = signature_list[0]
                         
@@ -265,7 +268,6 @@ class Config_Convertor_Handler:
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected,dest_net_per_policy))
                 
                 if policy_type == "DNS_app":
-                    signature_selected = signature_list[1]
                     Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy))
             Policy_priorty +=5
@@ -466,18 +468,18 @@ def create_single_GEO_dic(GEO_Profile_name):
 
     return GEO_profile_body
 
-def create_custom_signature(Sig_Profile_name,application):
+def create_custom_signature(Policy_name,application):
 
     if application == "DNS":    
         DNS_service_body = {
-            "rsIDSSignaturesProfileName": "dns_custom_profile",
+            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
             "rsIDSSignaturesProfileRuleName": "1",
             "rsIDSSignaturesProfileRuleAttributeType": "Services",
             "rsIDSSignaturesProfileRuleAttributeName": "Network Services-DNS"
         }
         
         Complexity_low_body = {
-            "rsIDSSignaturesProfileName": "dns_custom_profile",
+            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
             "rsIDSSignaturesProfileRuleName": "1",
             "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
             "rsIDSSignaturesProfileRuleAttributeName": "Low"
@@ -599,10 +601,11 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         return Policy_DNS_body
 
 
+
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
 #d1.create_net_class_list()
 #d1.create_BDoS_Profile_dic()
 #d1.create_Syn_Profile_dic()
 #d1.create_Protections_Per_Policy_dic()
-
+#d1.create_Singature_Profile_dic()
