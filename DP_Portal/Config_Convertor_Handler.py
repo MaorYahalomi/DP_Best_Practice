@@ -259,8 +259,6 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[1]
                     elif application_type == "SMTP":
                         signature_selected = signature_list[2]
-                    elif application_type == "DNS":
-                        signature_selected = f"{Policy_Name}_dns_cust"
                     elif application_type == "Global": 
                         signature_selected = signature_list[0]
                         
@@ -268,6 +266,7 @@ class Config_Convertor_Handler:
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected,dest_net_per_policy))
                 
                 if policy_type == "DNS_app":
+                    signature_selected = f"{Policy_Name}_dns_cust"
                     Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy))
             Policy_priorty +=5

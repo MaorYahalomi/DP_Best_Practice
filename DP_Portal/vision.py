@@ -178,20 +178,21 @@ class Vision:
 
 	def Protection_config(self):
 	 
+	  delay_time = 1.5
 	  self.lock_device(DP_IP)
-	  time.sleep(1.5)
+	  time.sleep(delay_time)
 	  self.DNS_profile_config()
-	  time.sleep(3.0)
+	  time.sleep(delay_time)
 	  self.BDoS_profile_config()
-	  time.sleep(3.0)
+	  time.sleep(delay_time)
 	  self.OOS_profile_config()
-	  time.sleep(3.0)
+	  time.sleep(delay_time)
 	  self.SYN_profile_config()
-	  time.sleep(3.0)
+	  time.sleep(delay_time)
 	  self.AS_profile_config()
-	  time.sleep(3.0)
+	  time.sleep(delay_time)
 	  self.DNS_SIG_config()
-	  time.sleep(3.0)
+	  time.sleep(delay_time)
 	  self.update_policy(DP_IP)
 
 
