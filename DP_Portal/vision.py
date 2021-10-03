@@ -64,23 +64,21 @@ class Vision:
 
 	def DNS_SIG_config(self):
 		DNS_custom_config_file = self.config_file.create_Singature_Profile_dic()
-		if DNS_custom_config_file:				
-			print("DNS Custom Profile Configurations\n")
-			for index in range(len(DNS_custom_config_file)):
-				url_dns_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']}/1/Services/Network%20Services-DNS/"
-				url_dns_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{DNS_custom_config_file[index][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
-				dns_service_body = json.dumps(DNS_custom_config_file[index][0])
-				dns_complex_body = json.dumps(DNS_custom_config_file[index][1])
-				response = self.session.post(
-					url_dns_service, data=dns_service_body, verify=False)
-				response = self.session.post(
-					url_dns_complex, data=dns_complex_body, verify=False)
-
-				print(
-					f"DNS:Service : {DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
-				print(
-					f"DNS:Complex :{DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
-			print("\n"+"*"*30+"\n")
+		print("DNS Custom Profile Configurations\n")
+		for index in range(len(DNS_custom_config_file)):
+			url_dns_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']}/1/Services/Network%20Services-DNS/"
+			url_dns_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{DNS_custom_config_file[index][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
+			dns_service_body = json.dumps(DNS_custom_config_file[index][0])
+			dns_complex_body = json.dumps(DNS_custom_config_file[index][1])
+			response = self.session.post(
+				url_dns_service, data=dns_service_body, verify=False)
+			response = self.session.post(
+				url_dns_complex, data=dns_complex_body, verify=False)
+			print(
+				f"DNS:Service : {DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+			print(
+				f"DNS:Complex :{DNS_custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
 
 	def OOS_profile_config(self):
 		OOS_config_file = self.config_file.create_OOS_Profile_dic()
@@ -121,7 +119,7 @@ class Vision:
 			app_res = self.session.post(app_url, data=app_Body, verify=False)
 			print(f"{syn_app_dic[index]['rsIDSSYNAttackName']} App for syn Status: {app_res.status_code}")
                     
-	def DNS_profile_config(self):
+	def DNS_Flood_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
 		print("DNS Profile Configurations\n")
 		for index in range(len(DNS_config_file)):
@@ -180,8 +178,8 @@ class Vision:
 	 
 	  delay_time = 1.5
 	  self.lock_device(DP_IP)
-	  time.sleep(delay_time)
-	  self.DNS_profile_config()
+	#   time.sleep(delay_time)
+	#   self.DNS_Flood_profile_config()
 	  time.sleep(delay_time)
 	  self.BDoS_profile_config()
 	  time.sleep(delay_time)
@@ -191,18 +189,25 @@ class Vision:
 	  time.sleep(delay_time)
 	  self.AS_profile_config()
 	  time.sleep(delay_time)
-	  self.DNS_SIG_config()
-	  time.sleep(delay_time)
 	  self.update_policy(DP_IP)
 
 
 	def Policy_config(self):
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		DNS_Singature_Profiles_Dict = self.config_file.create_Singature_Profile_dic()
+		DNS_Flood_Profiles_Dict = self.config_file.create_DNS_Profile_dic()
+		#Checks if Custom DNS Singature profile is requierd or not
+		if DNS_Singature_Profiles_Dict:
+			self.DNS_SIG_config()
+		#Checks if DNS Flood profile is requierd or not
+		if DNS_Flood_Profiles_Dict:
+			self.DNS_Flood_profile_config()
+
 		print("Policy Configurations\n")
 		for index in range(len(Policy_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
-			AS_profile_body = json.dumps(Policy_config_file[index])
-			response = self.session.post(url, data=AS_profile_body, verify=False)
+			Policy_profile_body = json.dumps(Policy_config_file[index])
+			response = self.session.post(url, data=Policy_profile_body, verify=False)
 			print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
@@ -222,8 +227,8 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.update_policy(DP_IP)
 	#v1.HTTPS_profile_config()
 v1.lock_device(DP_IP)
-v1.net_class_config()
-v1.Protection_config()
+#v1.net_class_config()
+#v1.Protection_config()
 v1.Policy_config()
 v1.update_policy(DP_IP)
 

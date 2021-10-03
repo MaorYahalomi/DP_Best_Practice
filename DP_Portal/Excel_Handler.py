@@ -39,11 +39,20 @@ class Excel_Handler:
 
     def get_Full_Inspection_Flag_Status(self, index):
         xl_format = self.read_table("Policy Editor")
-        policy_name = xl_format[index]["Is Service Behind CDN?"]
-        if pd.isna(policy_name) == False:
-            return policy_name
+        Full_inspect_flag = xl_format[index]["Is Full Inspection needed?"]
+        if pd.isna(Full_inspect_flag) == False:
+            return Full_inspect_flag
         else:
-            return False
+            return False   
+    
+    def get_CDN_Flag_Status(self, index):
+        xl_format = self.read_table("Policy Editor")
+        CDN_Flag = xl_format[index]["Is Service Behind CDN?"]
+        if pd.isna(CDN_Flag) == False:
+            CDN_Type = xl_format[index]["CDN Method"]
+            return CDN_Flag, CDN_Type
+        else:
+            return False, False
 
 
     def check_multi_network(self):
@@ -77,3 +86,4 @@ class Excel_Handler:
 v1 = Excel_Handler("server_test.xlsm")
 #v1.create_net_class_dic()
 #v1.get_BDoS_profile_details()
+#v1.get_CDN_Flag_Status(1)

@@ -93,7 +93,6 @@ class Config_Convertor_Handler:
             if Policy_Name != False:
                 if Application_type == "DNS":
                     if math.isnan(DNS_Expected_QPS) == False and math.isnan(DNS_Max_QPS) == False:
-                        #print(DNS_Expected_QPS)
                         DNS_Profile_list.append(
                             create_single_DNS_dic(Policy_Name, int(DNS_Expected_QPS), int(DNS_Max_QPS)))
         
@@ -200,10 +199,7 @@ class Config_Convertor_Handler:
     def create_Singature_Profile_dic(self):
         # Function Description:
         # Creats List of dictorney Sig Profile configuration
-        #https://10.213.17.49/mgmt/device/byip/10.213.17.52/config/rsIDSSignaturesProfilesTable/dns_custom/1/Complexity/Low/
         Sig_Profile_list = []
-        # Sig_Profile_xl_format = self.configuration_book.read_table(
-        #     "Policy Editor")
         Sig_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(Sig_Profile_xl_format)):
@@ -237,10 +233,7 @@ class Config_Convertor_Handler:
         return HTTPS_Profile_list
 
     def create_Protections_Per_Policy_dic(self):
-        # Maybe Delete
-        # Function Description:
-        # Creats List of protections per policy configuration
-        # basic app = ["HTTP", "HTTPS", "FTP", "SMTP"]
+        
         Policy_priorty = 300
         signature_list = ["DoS-All", "Corp-DMZ-Web", "Corp-DMZ-Mail"]
         Protection_per_policy_list = []
@@ -248,6 +241,7 @@ class Config_Convertor_Handler:
         for index in range(len(protections_xl_format)):
             application_type = self.configuration_book.get_application_type(
                 index)
+            CDN_Flag,CDN_Type = self.configuration_book.get_CDN_Flag_Status(index)
             Policy_Name = self.configuration_book.get_Policy_Name(index)
             dest_net_per_policy = protections_xl_format[index]["DST Networks Name"]
             if Policy_Name != False:
@@ -263,12 +257,12 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[0]
                         
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected,dest_net_per_policy))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag))
                 
                 if policy_type == "DNS_app":
                     signature_selected = f"{Policy_Name}_dns_cust"
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy,CDN_Flag))
             Policy_priorty +=5
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
@@ -520,7 +514,7 @@ def protection_per_policy_check(application_type):
         app_type_response = "Global"
         return app_type_response
 
-def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net,):
+def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net,Behind_CDN):
     
     if policy_type == "basic_app":
         Policy_basic_body = {
@@ -545,18 +539,19 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileAppsec": signature_profile,
             "rsIDSNewRulesProfileSynprotection":  f"{Policy_Name}_auto_syn",
             "rsIDSNewRulesProfileTrafficFilters": "",
-            "rsIDSNewRulesCdnHandling": "2",
+            "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
             "rsIDSNewRulesCdnHandlingHttps": "1",
             "rsIDSNewRulesCdnHandlingSig": "1",
             "rsIDSNewRulesCdnHandlingSyn": "1",
             "rsIDSNewRulesCdnHandlingTF": "1",
-            "rsIDSNewRulesCdnAction": "2",
+            "rsIDSNewRulesCdnAction": "1",
             "rsIDSNewRulesCdnTrueClientIpHdr": "1",
             "rsIDSNewRulesCdnXForwardedForHdr": "1",
             "rsIDSNewRulesCdnForwardedHdr": "2",
             "rsIDSNewRulesCdnTrueIpCustomHdr": "",
             "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
-            "rsIDSNewRulesPacketReportingEnforcement": "1"
+            "rsIDSNewRulesPacketReportingEnforcement": "1",
+            "rsIDSNewRulesPacketReportingStatus": "1"
         }
     
         return Policy_basic_body
@@ -584,18 +579,19 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileAppsec": signature_profile,
             "rsIDSNewRulesProfileSynprotection": "",
             "rsIDSNewRulesProfileTrafficFilters": "",
-            "rsIDSNewRulesCdnHandling": "2",
+            "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
             "rsIDSNewRulesCdnHandlingHttps": "1",
             "rsIDSNewRulesCdnHandlingSig": "1",
             "rsIDSNewRulesCdnHandlingSyn": "1",
             "rsIDSNewRulesCdnHandlingTF": "1",
-            "rsIDSNewRulesCdnAction": "2",
+            "rsIDSNewRulesCdnAction": "1",
             "rsIDSNewRulesCdnTrueClientIpHdr": "1",
             "rsIDSNewRulesCdnXForwardedForHdr": "1",
             "rsIDSNewRulesCdnForwardedHdr": "2",
             "rsIDSNewRulesCdnTrueIpCustomHdr": "",
             "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
-            "rsIDSNewRulesPacketReportingEnforcement": "1"
+            "rsIDSNewRulesPacketReportingEnforcement": "1",
+            "rsIDSNewRulesPacketReportingStatus": "1"
         }
         return Policy_DNS_body
 
@@ -603,8 +599,8 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
 
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
-#d1.create_net_class_list()
-#d1.create_BDoS_Profile_dic()
-#d1.create_Syn_Profile_dic()
-#d1.create_Protections_Per_Policy_dic()
-#d1.create_Singature_Profile_dic()
+    #d1.create_net_class_list()
+    #d1.create_BDoS_Profile_dic()
+    #d1.create_Syn_Profile_dic()
+    #d1.create_Protections_Per_Policy_dic()
+    #d1.create_Singature_Profile_dic()
