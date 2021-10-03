@@ -520,6 +520,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
     if Behind_CDN == "Yes":
         list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
         print(list_of_cdn_option)
+        print(type(list_of_cdn_option[0]["rsIDSNewRulesCdnHdrNotFoundFallback"]))
     
     if policy_type == "basic_app":
         Policy_basic_body = {
@@ -550,11 +551,11 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesCdnHandlingSyn": "1",
             "rsIDSNewRulesCdnHandlingTF": "2",
             "rsIDSNewRulesCdnAction": "1",
-            "rsIDSNewRulesCdnTrueClientIpHdr": "1",
-            "rsIDSNewRulesCdnXForwardedForHdr": "1",
-            "rsIDSNewRulesCdnForwardedHdr": "2",
+            "rsIDSNewRulesCdnTrueClientIpHdr": list_of_cdn_option[2]["rsIDSNewRulesCdnTrueClientIpHdr"] if Behind_CDN == "Yes" else "1",
+            "rsIDSNewRulesCdnXForwardedForHdr": list_of_cdn_option[1]["rsIDSNewRulesCdnXForwardedForHdr"] if Behind_CDN == "Yes" else "1",
+            "rsIDSNewRulesCdnForwardedHdr": list_of_cdn_option[3]["rsIDSNewRulesCdnForwardedHdr"] if Behind_CDN == "Yes" else "1",
             "rsIDSNewRulesCdnTrueIpCustomHdr": "",
-            "rsIDSNewRulesCdnHdrNotFoundFallback": "1",
+            "rsIDSNewRulesCdnHdrNotFoundFallback": list_of_cdn_option[0]["rsIDSNewRulesCdnHdrNotFoundFallback"] if Behind_CDN == "Yes" else "1",
             "rsIDSNewRulesPacketReportingEnforcement": "1",
             "rsIDSNewRulesPacketReportingStatus": "1"
         }
@@ -604,24 +605,29 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
 def Create_CDN_Option_Dict(CDN_Method):
 
     print(CDN_Method)
-    # 2 =  Active
-    # 1 =  Disabled
+    # 1 =  Active
+    # 2 =  Disabled
+    # rsIDSNewRulesCdnHdrNotFoundFallback: "1" = Use the Layer 3 Source IP Address
+    # rsIDSNewRulesCdnHdrNotFoundFallback: "2" = Apply Blocking Action
     CDN_List_Options = []
     if CDN_Method == "CDN only - True-Client + XFF":
         # Default Option for CDN Handling
-        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement":"1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr":"1"})
-        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr":"1"})   
+        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr":"1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"}) 
     if CDN_Method == "CDN only- True-Client":
-        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"})
     if CDN_Method == "CDN only - XFF":
-        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "2"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"})
     if CDN_Method == "CDN only - Forwareded":
-        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "1"})
