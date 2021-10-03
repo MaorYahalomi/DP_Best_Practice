@@ -241,7 +241,8 @@ class Config_Convertor_Handler:
         for index in range(len(protections_xl_format)):
             application_type = self.configuration_book.get_application_type(
                 index)
-            CDN_Flag,CDN_Type = self.configuration_book.get_CDN_Flag_Status(index)
+            CDN_Flag = self.configuration_book.get_CDN_Flag_Status(index)
+            CDN_Method = self.configuration_book.get_CDN_Method(index)
             Policy_Name = self.configuration_book.get_Policy_Name(index)
             dest_net_per_policy = protections_xl_format[index]["DST Networks Name"]
             if Policy_Name != False:
@@ -257,12 +258,12 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[0]
                         
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method))
                 
                 if policy_type == "DNS_app":
                     signature_selected = f"{Policy_Name}_dns_cust"
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy,CDN_Flag))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method))
             Policy_priorty +=5
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
@@ -514,7 +515,11 @@ def protection_per_policy_check(application_type):
         app_type_response = "Global"
         return app_type_response
 
-def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net,Behind_CDN):
+def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net,Behind_CDN,CDN_Method):
+    
+    if Behind_CDN == "Yes":
+        list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
+        print(list_of_cdn_option)
     
     if policy_type == "basic_app":
         Policy_basic_body = {
@@ -541,9 +546,9 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileTrafficFilters": "",
             "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
             "rsIDSNewRulesCdnHandlingHttps": "1",
-            "rsIDSNewRulesCdnHandlingSig": "1",
+            "rsIDSNewRulesCdnHandlingSig": "2",
             "rsIDSNewRulesCdnHandlingSyn": "1",
-            "rsIDSNewRulesCdnHandlingTF": "1",
+            "rsIDSNewRulesCdnHandlingTF": "2",
             "rsIDSNewRulesCdnAction": "1",
             "rsIDSNewRulesCdnTrueClientIpHdr": "1",
             "rsIDSNewRulesCdnXForwardedForHdr": "1",
@@ -581,9 +586,9 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileTrafficFilters": "",
             "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
             "rsIDSNewRulesCdnHandlingHttps": "1",
-            "rsIDSNewRulesCdnHandlingSig": "1",
+            "rsIDSNewRulesCdnHandlingSig": "2",
             "rsIDSNewRulesCdnHandlingSyn": "1",
-            "rsIDSNewRulesCdnHandlingTF": "1",
+            "rsIDSNewRulesCdnHandlingTF": "2",
             "rsIDSNewRulesCdnAction": "1",
             "rsIDSNewRulesCdnTrueClientIpHdr": "1",
             "rsIDSNewRulesCdnXForwardedForHdr": "1",
@@ -596,6 +601,38 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         return Policy_DNS_body
 
 
+def Create_CDN_Option_Dict(CDN_Method):
+
+    print(CDN_Method)
+    # 2 =  Active
+    # 1 =  Disabled
+    CDN_List_Options = []
+    if CDN_Method == "CDN only - True-Client + XFF":
+        # Default Option for CDN Handling
+        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement":"1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr":"1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr":"1"})   
+    if CDN_Method == "CDN only- True-Client":
+        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "1"})
+    if CDN_Method == "CDN only - XFF":
+        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "2"})
+    if CDN_Method == "CDN only - Forwareded":
+        CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "2"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "1"})
+
+    # else:
+    #     CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
+    #     CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "1"})
+    #     CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "1"})
+
+    #print(CDN_List_Options)
+    return CDN_List_Options
 
 d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
@@ -604,3 +641,4 @@ d1 = Config_Convertor_Handler()
     #d1.create_Syn_Profile_dic()
     #d1.create_Protections_Per_Policy_dic()
     #d1.create_Singature_Profile_dic()
+#Create_CDN_Option_Dict("CDN only - True-Client + XFF")

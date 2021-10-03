@@ -49,11 +49,17 @@ class Excel_Handler:
         xl_format = self.read_table("Policy Editor")
         CDN_Flag = xl_format[index]["Is Service Behind CDN?"]
         if pd.isna(CDN_Flag) == False:
-            CDN_Type = xl_format[index]["CDN Method"]
-            return CDN_Flag, CDN_Type
+            return CDN_Flag
         else:
-            return False, False
+            return False
 
+    def get_CDN_Method(self, index):
+        xl_format = self.read_table("Policy Editor")
+        CDN_Type = xl_format[index]["CDN Method"]
+        if pd.isna(CDN_Type) == False:
+            return CDN_Type
+        else:
+            return False
 
     def check_multi_network(self):
         #Function Description:
