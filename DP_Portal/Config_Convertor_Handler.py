@@ -163,11 +163,13 @@ class Config_Convertor_Handler:
         # AS_Profile_xl_format = self.configuration_book.read_table(
         #     "Policy Editor")
         AS_Profile_xl_format = self.policy_editor_book
-
+        
         for index in range(len(AS_Profile_xl_format)):
+            Application_type = self.configuration_book.get_application_type(
+                index)
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
-            if Policy_Name != False:
+            if Policy_Name != False and Application_type != "Global":
                AS_Profile_list.append(
                    create_single_AS_dic(Policy_Name))
         return AS_Profile_list
@@ -206,10 +208,10 @@ class Config_Convertor_Handler:
                    create_single_GEO_dic(Policy_Name))
         return GEO_Profile_list
 
-    def create_Singature_Profile_dic(self):
+    def create_Custom_DNS_Singature_Profile_dic(self):
         # Function Description:
         # Creats List of dictorney Sig Profile configuration
-        Sig_Profile_list = []
+        Dns_Sig_Profile_list = []
         Sig_Profile_xl_format = self.policy_editor_book
 
         for index in range(len(Sig_Profile_xl_format)):
@@ -219,10 +221,27 @@ class Config_Convertor_Handler:
                 index)
             if Policy_Name != False:
                 if Application_type == "DNS":
-                    Sig_Profile_list.append(
+                    Dns_Sig_Profile_list.append(
                         create_custom_signature(Policy_Name, Application_type))
-        return Sig_Profile_list
+        return Dns_Sig_Profile_list
         
+    def create_Custom_FTP_Singature_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney Sig Profile configuration
+        FTP_Sig_Profile_list = []
+        Sig_Profile_xl_format = self.policy_editor_book
+
+        for index in range(len(Sig_Profile_xl_format)):
+            Application_type = self.configuration_book.get_application_type(
+                index)
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+                if Application_type == "FTP":
+                    FTP_Sig_Profile_list.append(
+                        create_custom_signature(Policy_Name, Application_type))
+        return FTP_Sig_Profile_list
+    
     def create_HTTPS_Profile_dic(self):
         # Function Description:
         # Creats List of dictorney HTTPS Profile configuration
@@ -264,10 +283,14 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[1]
                     elif application_type == "SMTP":
                         signature_selected = signature_list[2]
-                    elif application_type == "Global": 
+                    elif application_type == "FTP":
+                        # Need to Change Signature!!
+                        signature_selected = f"{Policy_Name}_FTP_cust"
+
+                if application_type == "Global": 
                         signature_selected = signature_list[0]
                         
-                    Protection_per_policy_list.append(
+                Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method))
                 
                 if policy_type == "DNS_app":
@@ -490,6 +513,22 @@ def create_custom_signature(Policy_name,application):
         }
         return DNS_service_body, Complexity_low_body
 
+    if application == "FTP":
+        FTP_service_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Services",
+            "rsIDSSignaturesProfileRuleAttributeName": "File Transfer-FTP"
+        }
+
+        FTP_Complexity_low_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
+            "rsIDSSignaturesProfileRuleAttributeName": "Low"
+        }
+        return FTP_service_body, FTP_Complexity_low_body
+
 def create_single_HTTPS_dic(HTTPS_Profile_name,full_inspection_flag):
    
     Full_inspection_value = 1 if full_inspection_flag == "Yes" else 2
@@ -507,7 +546,7 @@ def create_single_HTTPS_dic(HTTPS_Profile_name,full_inspection_flag):
     return HTTPS_profile_body
 
 def protection_per_application_check(application_type):
-    general_app_list = ["HTTP","HTTPS","FTP","SMTP"]
+    general_app_list = ["HTTP","HTTPS","FTP","SMTP","Global"]
     if application_type in general_app_list:
         return True
     return False
@@ -529,8 +568,8 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
     
     if Behind_CDN == "Yes":
         list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
-        print(list_of_cdn_option)
-        print(type(list_of_cdn_option[0]["rsIDSNewRulesCdnHdrNotFoundFallback"]))
+        # print(list_of_cdn_option)
+        # print(type(list_of_cdn_option[0]["rsIDSNewRulesCdnHdrNotFoundFallback"]))
     
     if policy_type == "basic_app":
         Policy_basic_body = {
@@ -611,6 +650,46 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         }
         return Policy_DNS_body
 
+    if policy_type == "Global":
+        Policy_basic_body = {
+            "rsIDSNewRulesState": "1",
+            "rsIDSNewRulesName": f"{Policy_Name}_BP",
+            "rsIDSNewRulesAction": "1",
+            "rsIDSNewRulesPriority": "1",
+            "rsIDSNewRulesSource": "any",
+            "rsIDSNewRulesDestination": f"{Dest_net}_auto",
+            "rsIDSNewRulesPortmask": "",
+            "rsIDSNewRulesDirection": "1",
+            "rsIDSNewRulesVlanTagGroup": "",
+            "rsIDSNewRulesProfileScanning": "",
+            "rsIDSNewRulesProfileNetflood": f"{Policy_Name}_auto_BDoS",
+            "rsIDSNewRulesProfileConlmt": "",
+            "rsIDSNewRulesProfilePpsRateLimit": "",
+            "rsIDSNewRulesProfileDNS": "",
+            "rsIDSNewRulesProfileErtAttackersFeed": "",
+            "rsIDSNewRulesProfileGeoFeed": "",
+            "rsIDSNewRulesProfileHttpsflood": "",
+            "rsIDSNewRulesProfileStateful":  f"{Policy_Name}_auto_oos",
+            "rsIDSNewRulesProfileAppsec": signature_profile,
+            "rsIDSNewRulesProfileSynprotection":  f"{Policy_Name}_auto_syn",
+            "rsIDSNewRulesProfileTrafficFilters": "",
+            "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
+            "rsIDSNewRulesCdnHandlingHttps": "1",
+            "rsIDSNewRulesCdnHandlingSig": "2",
+            "rsIDSNewRulesCdnHandlingSyn": "1",
+            "rsIDSNewRulesCdnHandlingTF": "2",
+            "rsIDSNewRulesCdnAction": "1",
+            "rsIDSNewRulesCdnTrueClientIpHdr": list_of_cdn_option[2]["rsIDSNewRulesCdnTrueClientIpHdr"] if Behind_CDN == "Yes" else "1",
+            "rsIDSNewRulesCdnXForwardedForHdr": list_of_cdn_option[1]["rsIDSNewRulesCdnXForwardedForHdr"] if Behind_CDN == "Yes" else "1",
+            "rsIDSNewRulesCdnForwardedHdr": list_of_cdn_option[3]["rsIDSNewRulesCdnForwardedHdr"] if Behind_CDN == "Yes" else "1",
+            "rsIDSNewRulesCdnTrueIpCustomHdr": "",
+            "rsIDSNewRulesCdnHdrNotFoundFallback": list_of_cdn_option[0]["rsIDSNewRulesCdnHdrNotFoundFallback"] if Behind_CDN == "Yes" else "1",
+            "rsIDSNewRulesPacketReportingEnforcement": "1",
+            "rsIDSNewRulesPacketReportingStatus": "1"
+        }
+
+        return Policy_basic_body
+
 def Create_CDN_Option_Dict(CDN_Method):
 
     # 1 =  Active
@@ -649,7 +728,6 @@ def Create_CDN_Option_Dict(CDN_Method):
     return CDN_List_Options
 
 def create_ntp_srv_body(NTP_IP):
-
     NTP_IP_body = {
         "rsWSDNTPServerUrl": NTP_IP
     }
@@ -659,7 +737,6 @@ def create_ntp_srv_body(NTP_IP):
     }
 
     return NTP_IP_body, NTP_Enable_body
-
 
 d1 = Config_Convertor_Handler()
 #d1.create_ntp_config()
