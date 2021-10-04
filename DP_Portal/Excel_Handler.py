@@ -61,6 +61,14 @@ class Excel_Handler:
         else:
             return False
 
+    def get_ntp_server(self, index):
+        xl_format = self.read_table("Global Information")
+        ntp_ip = xl_format[index]["NTP Server"]
+        if pd.isna(ntp_ip) == False:
+            return ntp_ip
+        else:
+            return False
+
     def check_multi_network(self):
         #Function Description:
             # Checks which networks class contains multiple entries,

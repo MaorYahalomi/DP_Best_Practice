@@ -89,7 +89,22 @@ class Vision:
 			response = self.session.post(url, data=oos_profile_body, verify=False)
 			print(f"{OOS_config_file[index]['rsSTATFULProfileName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
-				
+
+	def NTP_server_config(self):
+		NTP_config_file = self.config_file.create_ntp_config()
+		print("NTP Server Configurations\n")
+		ntp_srv_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config"
+		ntp_ip_body = json.dumps(NTP_config_file[0][0])
+		ntp_enable = json.dumps(NTP_config_file[0][1])
+		ntp_ip_res = self.session.put(
+			ntp_srv_url, data=ntp_ip_body, verify=False)
+		ntp_enable_res = self.session.put(
+			ntp_srv_url, data=ntp_enable, verify=False)
+
+		print(f" NTP IP Configuration Response --> {ntp_ip_res.status_code}")
+		print(f" NTP Enable Response --> {ntp_enable_res.status_code}")
+		print("\n"+"*"*30+"\n")
+
 	def SYN_profile_config(self):
 		SYN_config_file = self.config_file.create_Syn_Profile_dic()
 		print("SYN Profile Configurations\n")
@@ -176,10 +191,8 @@ class Vision:
 
 	def Protection_config(self):
 	 
-	  delay_time = 1.5
+	  delay_time = 2.5
 	  self.lock_device(DP_IP)
-	#   time.sleep(delay_time)
-	#   self.DNS_Flood_profile_config()
 	  time.sleep(delay_time)
 	  self.BDoS_profile_config()
 	  time.sleep(delay_time)
@@ -190,18 +203,22 @@ class Vision:
 	  self.AS_profile_config()
 	  time.sleep(delay_time)
 	  self.update_policy(DP_IP)
-
+	  time.sleep(delay_time)
 
 	def Policy_config(self):
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
 		DNS_Singature_Profiles_Dict = self.config_file.create_Singature_Profile_dic()
 		DNS_Flood_Profiles_Dict = self.config_file.create_DNS_Profile_dic()
+		NTP_Flag = self.config_file.create_ntp_config()
 		#Checks if Custom DNS Singature profile is requierd or not
 		if DNS_Singature_Profiles_Dict:
 			self.DNS_SIG_config()
 		#Checks if DNS Flood profile is requierd or not
 		if DNS_Flood_Profiles_Dict:
 			self.DNS_Flood_profile_config()
+		#Checks if NTP Server is requierd or not
+		if NTP_Flag:
+			v1.NTP_server_config()
 
 		print("Policy Configurations\n")
 		for index in range(len(Policy_config_file)):
@@ -226,10 +243,12 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.GEO_profile_config()
 	#v1.update_policy(DP_IP)
 	#v1.HTTPS_profile_config()
+
 v1.lock_device(DP_IP)
-#v1.net_class_config()
-#v1.Protection_config()
+v1.net_class_config()
+v1.Protection_config()
 v1.Policy_config()
 v1.update_policy(DP_IP)
+
 
 

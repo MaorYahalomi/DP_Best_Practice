@@ -11,8 +11,9 @@ class Config_Convertor_Handler:
     def __init__(self):
         self.configuration_book = Excel_Handler("server_test.xlsm")
         self.policy_editor_book = self.configuration_book.read_table("Policy Editor")
-        self.network_class_book = self.configuration_book.read_table(
-            "Network Classes")
+        self.network_class_book = self.configuration_book.read_table("Network Classes")
+        self.general_config_book = self.configuration_book.read_table("Global Information")
+    
     def print_table(self,worksheet): 
         print(self.configuration_book.read_table(worksheet))
 
@@ -61,6 +62,15 @@ class Config_Convertor_Handler:
                         
         #print(list_of_net)
         return net_class_list
+
+    def create_ntp_config(self):
+        
+        NTP_config_list = []
+        NTP_config_xl_format = self.general_config_book
+        NTP_IP = self.configuration_book.get_ntp_server(0)
+        NTP_IP_body,NTP_enalbe_body = create_ntp_srv_body(NTP_IP)
+        NTP_config_list.append(create_ntp_srv_body(NTP_IP))
+        return NTP_config_list
 
     def create_BDoS_Profile_dic(self):
         BDoS_Profile_list = []
@@ -601,10 +611,8 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         }
         return Policy_DNS_body
 
-
 def Create_CDN_Option_Dict(CDN_Method):
 
-    print(CDN_Method)
     # 1 =  Active
     # 2 =  Disabled
     # rsIDSNewRulesCdnHdrNotFoundFallback: "1" = Use the Layer 3 Source IP Address
@@ -640,7 +648,21 @@ def Create_CDN_Option_Dict(CDN_Method):
     #print(CDN_List_Options)
     return CDN_List_Options
 
+def create_ntp_srv_body(NTP_IP):
+
+    NTP_IP_body = {
+        "rsWSDNTPServerUrl": NTP_IP
+    }
+
+    NTP_Enable_body = {
+        "rsWSDNTPStatus": "1"
+    }
+
+    return NTP_IP_body, NTP_Enable_body
+
+
 d1 = Config_Convertor_Handler()
+#d1.create_ntp_config()
 #d1.print_table("Network Classes")
     #d1.create_net_class_list()
     #d1.create_BDoS_Profile_dic()
