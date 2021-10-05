@@ -141,15 +141,6 @@ class Vision:
 				print(f"{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}, Profile_Params_Update_Response --> {response_params_update.status_code}")
 		
 		print("\n"+"*"*30+"\n")
-
-	def SYN_App_Protecion_config(self):
-		
-		syn_app_dic = self.config_file.create_Syn_App_dic()
-		for index in range(len(syn_app_dic)):
-			app_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSYNAttackTable/{syn_app_dic[index]['rsIDSSYNAttackId']}/"
-			app_Body = json.dumps(syn_app_dic[index])
-			app_res = self.session.post(app_url, data=app_Body, verify=False)
-			print(f"{syn_app_dic[index]['rsIDSSYNAttackName']} App for syn Status: {app_res.status_code}")
                     
 	def DNS_Flood_profile_config(self):
 		DNS_config_file = self.config_file.create_DNS_Profile_dic()
@@ -211,19 +202,20 @@ class Vision:
 	  delay_time = 2.5
 	  self.lock_device(DP_IP)
 	  time.sleep(delay_time)
-	  self.BDoS_profile_config()
-	  time.sleep(delay_time)
-	  self.OOS_profile_config()
-	  time.sleep(delay_time)
+	#   self.BDoS_profile_config()
+	#   time.sleep(delay_time)
+	#   self.OOS_profile_config()
+	#   time.sleep(delay_time)
 	  self.SYN_profile_config()
 	  time.sleep(delay_time)
-	  self.AS_profile_config()
+	  #self.AS_profile_config()
 	  time.sleep(delay_time)
 	  self.update_policy(DP_IP)
 	  time.sleep(delay_time)
 
 	def Policy_config(self):
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		#print(Policy_config_file)
 		DNS_Singature_Profiles_Dict = self.config_file.create_Custom_DNS_Singature_Profile_dic()
 		DNS_Flood_Profiles_Dict = self.config_file.create_DNS_Profile_dic()
 		NTP_Flag = self.config_file.create_ntp_config()
@@ -266,7 +258,7 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 
 v1.lock_device(DP_IP)
 #v1.net_class_config()
-v1.Protection_config()
+#v1.Protection_config()
 v1.Policy_config()
 #v1.update_policy(DP_IP)
 

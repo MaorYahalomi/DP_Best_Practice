@@ -122,6 +122,12 @@ class Config_Convertor_Handler:
         for index in range(len(Syn_Profile_xl_format)):
             Application_type = self.configuration_book.get_application_type(
                 index)
+            if Application_type == "FTP":
+                Application_type = "FTP_CNTL"
+            # Syn Pro for Global policy will be configured as "Spoofed Syn"
+            # But still requiers at least one paramter
+            if Application_type == "Global":
+                Application_type = "HTTPS"
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
             if Policy_Name != False:
@@ -129,13 +135,6 @@ class Config_Convertor_Handler:
                         Syn_Profile_list.append(
                                 create_single_Syn_dic(Policy_Name, Application_type))
         return Syn_Profile_list
-
-    def create_Syn_App_dic(self):
-        Syn_App_list = []
-        #Syn_App_list.append(create_single_Syn_App("Mail"))
-        Syn_App_list.append(create_single_Syn_App("DNS"))
-
-        return Syn_App_list
 
     def create_OOS_Profile_dic(self):
         # Function Description:
@@ -276,8 +275,8 @@ class Config_Convertor_Handler:
             dest_net_per_policy = protections_xl_format[index]["DST Networks Name"]
             if Policy_Name != False:
                 policy_type = protection_per_policy_check(self.configuration_book.get_application_type(index))
-                if policy_type == "basic_app":
-                    #print(application_type)
+                if policy_type == "basic_app" or policy_type == "Global":
+                    # print(application_type)
                     #Basic Application Policy Section:
                     if application_type == "HTTP" or application_type == "HTTPS":
                         signature_selected = signature_list[1]
@@ -285,14 +284,13 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[2]
                     elif application_type == "FTP":
                         # Need to Change Signature!!
-                        signature_selected = f"{Policy_Name}_FTP_cust"
-
-                if application_type == "Global": 
+                        signature_selected = f"{Policy_Name}_FTP_cust"            
+                    elif application_type == "Global":
                         signature_selected = signature_list[0]
-                        
-                Protection_per_policy_list.append(
+
+                    Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method))
-                
+
                 if policy_type == "DNS_app":
                     signature_selected = f"{Policy_Name}_dns_cust"
                     Protection_per_policy_list.append(
@@ -301,7 +299,8 @@ class Config_Convertor_Handler:
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
             
-def create_single_Syn_dic(Syn_Profile_name, application_type_list):
+def create_single_Syn_dic(Syn_Profile_name, application_type):
+        
         
         syn_profile_body = {
             "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
@@ -312,7 +311,7 @@ def create_single_Syn_dic(Syn_Profile_name, application_type_list):
         }
         syn_paramaters_body = {
             "rsIDSSynProfilesName": f"{Syn_Profile_name}_auto",
-            "rsIDSSynProfileServiceName": application_type_list,
+            "rsIDSSynProfileServiceName": application_type,
             "rsIDSSynProfileType": "3"
         }
 
@@ -569,7 +568,6 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
     if Behind_CDN == "Yes":
         list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
         # print(list_of_cdn_option)
-        # print(type(list_of_cdn_option[0]["rsIDSNewRulesCdnHdrNotFoundFallback"]))
     
     if policy_type == "basic_app":
         Policy_basic_body = {
@@ -671,7 +669,8 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileHttpsflood": "",
             "rsIDSNewRulesProfileStateful":  f"{Policy_Name}_auto_oos",
             "rsIDSNewRulesProfileAppsec": signature_profile,
-            "rsIDSNewRulesProfileSynprotection":  f"{Policy_Name}_auto_syn",
+            "rsIDSNewRulesProfileSynprotection": f"{Policy_Name}_auto_syn",
+            "rsIDSNewRulesProfileSynprotection":  "",
             "rsIDSNewRulesProfileTrafficFilters": "",
             "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
             "rsIDSNewRulesCdnHandlingHttps": "1",
