@@ -63,38 +63,66 @@ class Vision:
 		print("\n"+"*"*30+"\n")
 
 	def DNS_SIG_config(self):
-		custom_config_file = self.config_file.create_Custom_DNS_Singature_Profile_dic()
+		custom_dns_config_file = self.config_file.create_Custom_DNS_Singature_Profile_dic()
 		print("DNS Custom Profile Configurations\n")
-		for index in range(len(custom_config_file)):
-			url_dns_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_config_file[index][0]['rsIDSSignaturesProfileName']}/1/Services/Network%20Services-DNS/"
-			url_dns_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_config_file[index][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
-			dns_service_body = json.dumps(custom_config_file[index][0])
-			dns_complex_body = json.dumps(custom_config_file[index][1])
-			response = self.session.post(
+		for index in range(len(custom_dns_config_file)):
+			url_dns_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_dns_config_file[index][0]['rsIDSSignaturesProfileName']}/1/Services/Network%20Services-DNS/"
+			url_dns_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_dns_config_file[index][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
+			dns_service_body = json.dumps(custom_dns_config_file[index][0])
+			dns_complex_body = json.dumps(custom_dns_config_file[index][1])
+			response_service = self.session.post(
 				url_dns_service, data=dns_service_body, verify=False)
-			response = self.session.post(
+			response_com = self.session.post(
 				url_dns_complex, data=dns_complex_body, verify=False)
 			print(
-				f"DNS:Service : {custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+				f"DNS-Service : {custom_dns_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response_service.status_code}")
 			print(
-				f"DNS:Complex :{custom_config_file[index][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+				f"DNS-Complex : {custom_dns_config_file[index][1]['rsIDSSignaturesProfileName']} --> {response_com.status_code}")
+		# Adding DOS fields to custom siganture:
+		url_threat_floods = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']}/2/Threat%20Type/DoS%20-%20Floods/"
+		url_threat_slow = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']}/2/Threat%20Type/DoS%20-%20Slow%20Rate/"
+		url_threat_vulen = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']}/2/Threat%20Type/DoS%20-%20Vulnerability//"
+		url_threat_floods_body = json.dumps(custom_dns_config_file[0][2])
+		url_threat_slow_body = json.dumps(custom_dns_config_file[0][3])
+		url_threat_vulen_body = json.dumps(custom_dns_config_file[0][4])
+		response_flood = self.session.post(url_threat_floods, data=url_threat_floods_body, verify=False)
+		response_slow = self.session.post(url_threat_slow, data=url_threat_slow_body, verify=False)
+		response_vulen  = self.session.post(url_threat_vulen, data=url_threat_vulen_body, verify=False)
+		print(f"Threat-Flood : {custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_flood.status_code}")
+		print(f"Threat-Slow : {custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_slow.status_code}")
+		print(f"Threat-Vulen: {custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_vulen.status_code}")
+
 		print("\n"+"*"*30+"\n")
 
 	def FTP_SIG_config(self):
-		custom_config_file = self.config_file.create_Custom_FTP_Singature_Profile_dic()
+		custom_ftp_config_file = self.config_file.create_Custom_FTP_Singature_Profile_dic()
 		print("FTP Custom Profile Configurations\n")
-		url_ftp_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_config_file[0][0]['rsIDSSignaturesProfileName']}/1/Services/File%20Transfer-FTP/"
-		url_ftp_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_config_file[0][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
-		ftp_service_body = json.dumps(custom_config_file[0][0])
-		ftp_complex_body = json.dumps(custom_config_file[0][1])
-		response = self.session.post(
+		url_ftp_service = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']}/1/Services/File%20Transfer-FTP/"
+		url_ftp_complex = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_ftp_config_file[0][1]['rsIDSSignaturesProfileName']}/1/Complexity/Low/"
+		ftp_service_body = json.dumps(custom_ftp_config_file[0][0])
+		ftp_complex_body = json.dumps(custom_ftp_config_file[0][1])
+		response_service = self.session.post(
 			url_ftp_service, data=ftp_service_body, verify=False)
-		response = self.session.post(
+		response_comp = self.session.post(
 			url_ftp_complex, data=ftp_complex_body, verify=False)
-		print(
-			f"FTP:Service : {custom_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
-		print(
-			f"FTP:Complex :{custom_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response.status_code}")
+		print(f"FTP-Service : {custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_service.status_code}")
+		print(f"FTP-Complex : {custom_ftp_config_file[0][1]['rsIDSSignaturesProfileName']} --> {response_comp.status_code}")
+
+		#Adding DOS fields to custom siganture:
+		url_threat_floods = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']}/2/Threat%20Type/DoS%20-%20Floods/"
+		url_threat_slow = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']}/2/Threat%20Type/DoS%20-%20Slow%20Rate/"
+		url_threat_vulen = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSignaturesProfilesTable/{custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']}/2/Threat%20Type/DoS%20-%20Vulnerability//"
+		url_threat_floods_body = json.dumps(custom_ftp_config_file[0][2])
+		url_threat_slow_body = json.dumps(custom_ftp_config_file[0][3])
+		url_threat_vulen_body = json.dumps(custom_ftp_config_file[0][4])
+		response_flood = self.session.post(url_threat_floods, data=url_threat_floods_body, verify=False)
+		response_slow = self.session.post(url_threat_slow, data=url_threat_slow_body, verify=False)
+		response_vulen = self.session.post(url_threat_vulen, data=url_threat_vulen_body, verify=False)
+		print(f"Threat-Flood : {custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_flood.status_code}")
+		print(f"Threat-Slow : {custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_slow.status_code}")
+		print(f"Threat-Vulen: {custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']} --> {response_vulen.status_code}")
+			
+
 		print("\n"+"*"*30+"\n")
 
 	def OOS_profile_config(self):
@@ -202,20 +230,19 @@ class Vision:
 	  delay_time = 2.5
 	  self.lock_device(DP_IP)
 	  time.sleep(delay_time)
-	#   self.BDoS_profile_config()
-	#   time.sleep(delay_time)
-	#   self.OOS_profile_config()
-	#   time.sleep(delay_time)
+	  self.BDoS_profile_config()
+	  time.sleep(delay_time)
+	  self.OOS_profile_config()
+	  time.sleep(delay_time)
 	  self.SYN_profile_config()
 	  time.sleep(delay_time)
-	  #self.AS_profile_config()
+	  self.AS_profile_config()
 	  time.sleep(delay_time)
 	  self.update_policy(DP_IP)
 	  time.sleep(delay_time)
 
 	def Policy_config(self):
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
-		#print(Policy_config_file)
 		DNS_Singature_Profiles_Dict = self.config_file.create_Custom_DNS_Singature_Profile_dic()
 		DNS_Flood_Profiles_Dict = self.config_file.create_DNS_Profile_dic()
 		NTP_Flag = self.config_file.create_ntp_config()
@@ -240,6 +267,17 @@ class Vision:
 			print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
+	def Del_Policy_config(self):
+		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		# print("Policy Configurations\n")
+		for index in range(len(Policy_config_file)):
+			policy_name = Policy_config_file[index]["rsIDSNewRulesName"]
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{policy_name}/"
+			Policy_profile_body = json.dumps(Policy_config_file[index])
+			response = self.session.delete(url, data=Policy_profile_body, verify=False)
+		print(f"Delete Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
+
 # MAIN Prog Tests#
 
 v1 = Vision(Vision_IP, Vision_user, Vision_password)
@@ -257,10 +295,9 @@ v1 = Vision(Vision_IP, Vision_user, Vision_password)
 	#v1.HTTPS_profile_config()
 
 v1.lock_device(DP_IP)
-#v1.net_class_config()
-#v1.Protection_config()
+# v1.net_class_config()
+# v1.Protection_config()
 v1.Policy_config()
-#v1.update_policy(DP_IP)
-
-
+#v1.Del_Policy_config()
+v1.update_policy(DP_IP)
 

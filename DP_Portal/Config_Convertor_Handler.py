@@ -510,7 +510,27 @@ def create_custom_signature(Policy_name,application):
             "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
             "rsIDSSignaturesProfileRuleAttributeName": "Low"
         }
-        return DNS_service_body, Complexity_low_body
+
+        # Dos Signature Configuarion
+        Threat_Floods_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
+            "rsIDSSignaturesProfileRuleName": "2",
+            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
+            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Floods"
+        }
+        Threat_Slow_rate_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
+            "rsIDSSignaturesProfileRuleName": "2",
+            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
+            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Slow Rate"
+        }
+        Threat_Vulenr_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
+            "rsIDSSignaturesProfileRuleName": "2",
+            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
+            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Vulnerability"
+        }
+        return DNS_service_body, Complexity_low_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
 
     if application == "FTP":
         FTP_service_body = {
@@ -526,7 +546,26 @@ def create_custom_signature(Policy_name,application):
             "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
             "rsIDSSignaturesProfileRuleAttributeName": "Low"
         }
-        return FTP_service_body, FTP_Complexity_low_body
+        # Dos Signature Configuarion
+        Threat_Floods_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileRuleName": "2",
+            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
+            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Floods"
+        }
+        Threat_Slow_rate_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileRuleName": "2",
+            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
+            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Slow Rate"
+        }
+        Threat_Vulenr_body = {
+            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileRuleName": "2",
+            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
+            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Vulnerability"
+        }
+        return FTP_service_body, FTP_Complexity_low_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
 
 def create_single_HTTPS_dic(HTTPS_Profile_name,full_inspection_flag):
    
@@ -670,7 +709,6 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileStateful":  f"{Policy_Name}_auto_oos",
             "rsIDSNewRulesProfileAppsec": signature_profile,
             "rsIDSNewRulesProfileSynprotection": f"{Policy_Name}_auto_syn",
-            "rsIDSNewRulesProfileSynprotection":  "",
             "rsIDSNewRulesProfileTrafficFilters": "",
             "rsIDSNewRulesCdnHandling": "1" if Behind_CDN == "Yes" else "2",
             "rsIDSNewRulesCdnHandlingHttps": "1",
