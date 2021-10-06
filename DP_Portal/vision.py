@@ -1,4 +1,5 @@
 import urllib3
+import getpass
 urllib3.disable_warnings()
 from os import error
 from Excel_Handler import Excel_Handler
@@ -168,6 +169,15 @@ class Vision:
 				print(f"{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}, Profile_Creation_Response --> {profile_create_res.status_code}")
 				print(f"{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}, Profile_Params_Update_Response --> {response_params_update.status_code}")
 		
+				#Checks if its the Global Policy, need to configure HTTPS, and HTTP 
+				# Adding HTTP Application to Syn Profile
+				if SYN_config_file[index][0]['rsIDSSynProfilesParamsName'] == "Global_auto_syn":
+					profile_create_url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSSynProfilesTable/{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}/{SYN_config_file[index][2]['rsIDSSynProfileServiceName']}/"
+					profile_paramters_HTTP = json.dumps(SYN_config_file[index][1])
+					rofile_create_res = self.session.post(
+                                            profile_create_url, data=profile_paramters_HTTP, verify=False)
+					print(f"{SYN_config_file[index][0]['rsIDSSynProfilesParamsName']}, Adding HTTP To global Syn Profile --> {profile_create_res.status_code}")
+
 		print("\n"+"*"*30+"\n")
                     
 	def DNS_Flood_profile_config(self):
@@ -273,31 +283,82 @@ class Vision:
 		for index in range(len(Policy_config_file)):
 			policy_name = Policy_config_file[index]["rsIDSNewRulesName"]
 			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSNewRulesTable/{policy_name}/"
-			Policy_profile_body = json.dumps(Policy_config_file[index])
-			response = self.session.delete(url, data=Policy_profile_body, verify=False)
-		print(f"Delete Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+			response = self.session.delete(url, verify=False)
+			print(f"Delete Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
+
+	def Del_BdoS_config(self):
+		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		#print(Policy_config_file)
+		print("Delete BDoS Configurations\n")
+		for index in range(len(Policy_config_file)):
+			policy_name = f"{Policy_config_file[index]['rsIDSNewRulesName']}_auto_BDoS".split("_B")
+			bdos_profile_name = f"{policy_name[0]}_auto_BDoS"
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsNetFloodProfileTable/{bdos_profile_name}/"
+			response = self.session.delete(url, verify=False)
+			print(f"Delete BDoS: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
+
+	def Del_OOS_config(self):
+		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		#print(Policy_config_file)
+		print("Delete OOS Configurations\n")
+		for index in range(len(Policy_config_file)):
+			policy_name = f"{Policy_config_file[index]['rsIDSNewRulesName']}_auto_oos".split("_B")
+			oos_profile_name = f"{policy_name[0]}_auto_oos"
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsStatefulProfileTable/{oos_profile_name}/"
+			response = self.session.delete(url, verify=False)
+			print(f"Delete OOS: {oos_profile_name} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
+
+	def Del_AS_config(self):
+		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
+		print("Delete OOS Configurations\n")
+		for index in range(len(Policy_config_file)):
+			policy_name = f"{Policy_config_file[index]['rsIDSNewRulesName']}_auto_as".split("_B")
+			as_profile_name = f"{policy_name[0]}_auto_as"
+			url = f"https://{self.ip}/mgmt/device/byip/{DP_IP}/config/rsIDSScanningProfilesTable/{as_profile_name}/"
+			response = self.session.delete(url, verify=False)
+			print(f"Delete AS: {as_profile_name} --> {response.status_code}")
+		print("\n"+"*"*30+"\n")
+	
+	def Delete_configuration(self):
+	   delay_time = 2.5
+	   self.lock_device(DP_IP)
+	   time.sleep(delay_time)
+	   self.Del_Policy_config()
+	   time.sleep(delay_time)
+	   self.Del_BdoS_config()
+	   time.sleep(delay_time)
+	   self.Del_OOS_config()
+	   time.sleep(delay_time)
+	   self.Del_AS_config()
+	   time.sleep(delay_time)
+	   self.update_policy(DP_IP)
+
 
 # MAIN Prog Tests#
 
-v1 = Vision(Vision_IP, Vision_user, Vision_password)
-#Protection tests
+if __name__ == "__main__":
+	
+	Vision_pass = getpass.getpass("Enter Vision Password ")
+	v1 = Vision(Vision_IP, Vision_user, Vision_password)
+	#Protection tests
 
-	#v1.net_class_config()
-	#v1.bdos_profile_config()
-	#v1.DNS_profile_config()
-	#v1.SYN_profile_config()
-	#v1.OOS_profile_config()
-	#v1.AS_profile_config()
-	#v1.ERT_profile_config()
-	#v1.GEO_profile_config()
-	#v1.update_policy(DP_IP)
-	#v1.HTTPS_profile_config()
-
-v1.lock_device(DP_IP)
-# v1.net_class_config()
-# v1.Protection_config()
-v1.Policy_config()
-#v1.Del_Policy_config()
-v1.update_policy(DP_IP)
-
+		#v1.net_class_config()
+		#v1.bdos_profile_config()
+		#v1.DNS_profile_config()
+		#v1.SYN_profile_config()
+		#v1.OOS_profile_config()
+		#v1.AS_profile_config()
+		#v1.ERT_profile_config()
+		#v1.GEO_profile_config()
+		#v1.update_policy(DP_IP)
+		#v1.HTTPS_profile_config()
+	print(Vision_pass)
+	# v1.lock_device(DP_IP)
+	# # v1.net_class_config()
+	# v1.Protection_config()
+	# v1.Policy_config()
+	# # v1.update_policy(DP_IP)
+	# # v1.Delete_configuration()

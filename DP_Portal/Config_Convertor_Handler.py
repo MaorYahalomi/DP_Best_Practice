@@ -118,6 +118,7 @@ class Config_Convertor_Handler:
         # Syn_Profile_xl_format = self.configuration_book.read_table(
         #     "Policy Editor")
         Syn_Profile_xl_format = self.policy_editor_book
+        isGlobal = False
 
         for index in range(len(Syn_Profile_xl_format)):
             Application_type = self.configuration_book.get_application_type(
@@ -127,13 +128,15 @@ class Config_Convertor_Handler:
             # Syn Pro for Global policy will be configured as "Spoofed Syn"
             # But still requiers at least one paramter
             if Application_type == "Global":
+                isGlobal = True
                 Application_type = "HTTPS"
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
             if Policy_Name != False:
                 if protection_per_application_check(self.configuration_book.get_application_type(index)):
                         Syn_Profile_list.append(
-                                create_single_Syn_dic(Policy_Name, Application_type))
+                                create_single_Syn_dic(Policy_Name, Application_type,isGlobal))
+            isGlobal = False
         return Syn_Profile_list
 
     def create_OOS_Profile_dic(self):
@@ -299,9 +302,9 @@ class Config_Convertor_Handler:
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
             
-def create_single_Syn_dic(Syn_Profile_name, application_type):
+def create_single_Syn_dic(Syn_Profile_name, application_type,Global_syn_flag):
         
-        
+    if Global_syn_flag == False:
         syn_profile_body = {
             "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
             "rsIDSSynProfileTCPResetStatus": "1",
@@ -314,8 +317,36 @@ def create_single_Syn_dic(Syn_Profile_name, application_type):
             "rsIDSSynProfileServiceName": application_type,
             "rsIDSSynProfileType": "3"
         }
-
         return syn_profile_body, syn_paramaters_body
+
+    else:
+        syn_profile_body = {
+            "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
+            "rsIDSSynProfileTCPResetStatus": "1",
+            "rsIDSSynProfilesParamsWebEnable": "1",
+            #Enables JavaScript Challenge:
+            "rsIDSSynProfilesParamsWebMethod": "2"
+        }
+        syn_paramaters_body_HTTPS = {
+            "rsIDSSynProfilesName": f"{Syn_Profile_name}_auto",
+            "rsIDSSynProfileServiceName": "HTTPS",
+            "rsIDSSynProfileType": "3"
+        }
+        syn_paramaters_body_HTTP = {
+            "rsIDSSynProfilesName": f"{Syn_Profile_name}_auto",
+            "rsIDSSynProfileServiceName": "HTTP",
+            "rsIDSSynProfileType": "3"
+        }
+        return syn_profile_body, syn_paramaters_body_HTTPS, syn_paramaters_body_HTTP
+
+def create_single_Syn_spoof_dic(Syn_Profile_name):
+        
+    syn_spoof_profile_body = {
+           "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
+           "rsIDSSynProfileTrackingMode": "2"
+       }
+
+    return syn_spoof_profile_body
 
 def create_single_Syn_App(application_type):
     
@@ -731,30 +762,36 @@ def Create_CDN_Option_Dict(CDN_Method):
 
     # 1 =  Active
     # 2 =  Disabled
-    # rsIDSNewRulesCdnHdrNotFoundFallback: "1" = Use the Layer 3 Source IP Address
-    # rsIDSNewRulesCdnHdrNotFoundFallback: "2" = Apply Blocking Action
+    # rsIDSNewRulesCdnHdrNotFoundFallback: "1" = Use the Layer 3 Source IP Address (Mixed)
+    # rsIDSNewRulesCdnHdrNotFoundFallback: "2" = Apply Blocking Action (CDN Only)
     CDN_List_Options = []
     if CDN_Method == "CDN only - True-Client + XFF":
         # Default Option for CDN Handling
-        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr":"1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr":"1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"}) 
     if CDN_Method == "CDN only- True-Client":
-        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"})
     if CDN_Method == "CDN only - XFF":
-        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"})
     if CDN_Method == "CDN only - Forwareded":
-        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "1"})
+    if CDN_Method == "Mixed - True-Client + XFF":
+        # Default Option for CDN Handling
+        CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "1"})
+        CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"})
 
     # else:
     #     CDN_List_Options.append({"rsIDSNewRulesPacketReportingEnforcement": "1"})
