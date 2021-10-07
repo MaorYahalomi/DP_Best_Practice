@@ -9,6 +9,7 @@ from requests.sessions import session
 from error_handling import Error_handler, VISION_LOGIN_ERROR
 import json
 import time
+import timeit
 
 Vision_IP = "10.213.17.49"
 Vision_user = "radware"
@@ -43,9 +44,9 @@ class Vision:
 
 	def lock_device(self,dp_ip):
 		dp_list = self.config_file.get_dp_list()
-		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_list[0]}/lock"
+		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
 		response = self.session.post(url, verify=False)
-		print(f"Lock Device --> {response.status_code}")
+		print(f"Lock Device {dp_ip} --> {response.status_code}")
 		print("\n"+"*"*10+"\n")
 
 	def update_policy(self,dp_ip):
@@ -194,10 +195,10 @@ class Vision:
 	def AS_profile_config(self, dp_ip):
 
 		# Enable AS Global:
-		url_eanble_as = f"https: // {self.ip}/mgmt/device/byip/{dp_ip}/config"
+		url_eanble_as = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config"
 		body_enable = {"rsIDSScanningMechanismStatus": "1"}
 		AS_enable_body = json.dumps(body_enable)
-		response = self.session.put(url_eanble_as, data=body_enable, verify=False)
+		response = self.session.put(url_eanble_as, data=AS_enable_body, verify=False)
 		print(f"Enable AS Globally --> {response.status_code}")
                     
 		AS_config_file = self.config_file.create_AS_Profile_dic()
@@ -276,7 +277,7 @@ class Vision:
 			self.DNS_Flood_profile_config(dp_ip)
 		#Checks if NTP Server is requierd or not
 		if NTP_Flag:
-			v1.NTP_server_config(dp_ip)
+			self.NTP_server_config(dp_ip)
 
 		print("Policy Configurations\n")
 		print(f"Configure DP: {dp_ip}")
@@ -346,6 +347,16 @@ class Vision:
 	   time.sleep(delay_time)
 	   self.update_policy(dp_ip)
 
+def DP_config(vision_obj,dp_ip):
+
+	vision_obj.lock_device(dp_ip)
+	vision_obj.net_class_config(dp_ip)
+	vision_obj.Protection_config(dp_ip)
+	vision_obj.Policy_config(dp_ip)
+	vision_obj.update_policy(dp_ip)
+	time.sleep(3.0)
+ 	
+
 # MAIN Prog Tests#
 
 if __name__ == "__main__":
@@ -353,12 +364,16 @@ if __name__ == "__main__":
 	# Vision_IP = input("Enter Vision IP: ")
 	# Vision_user = input("Enter Vision User: ")
 	# Vision_password = getpass.getpass("Enter Vision Password: ")
-	v1 = Vision(Vision_IP, Vision_user, Vision_password)
-	DefensePro_list = v1.config_file.get_dp_list()
-
-	v1.lock_device(DefensePro_list[0])
-	# v1.net_class_config(DefensePro_list[0])
-	# v1.Protection_config(DefensePro_list[0])
-	# v1.Policy_config(DefensePro_list[0])
-	# v1.update_policy(DefensePro_list[0])
-	v1.Delete_configuration(DefensePro_list[0])
+	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
+	start_runtime = timeit.default_timer()
+	DefensePro_list = vision_obj.config_file.get_dp_list()
+	for index in range(len(DefensePro_list)):
+	 DP_config(vision_obj,DefensePro_list[index])
+	stop_runtime = timeit.default_timer()
+	print('Running Time: ', stop_runtime - start_runtime)
+	# Old Functios:
+		# vision_obj.lock_device(DefensePro_list[0])
+		# vision_obj.net_class_config(DefensePro_list[0])
+		# vision_obj.Policy_config(DefensePro_list[0])
+		# vision_obj.update_policy(DefensePro_list[0])
+	#vision_obj.Delete_configuration(DefensePro_list[0])
