@@ -28,6 +28,14 @@ class Excel_Handler:
             return application_type
         else:
             return False
+    
+    def get_DP_IP_detalis(self):
+        dp_list_type_xl_format = self.read_table("Global Information")
+        #DP__list = dp_list_type_xl_format[index]["IP"]
+        DP_IP_List = []
+        for index in range(len(dp_list_type_xl_format)):
+            DP_IP_List.append(dp_list_type_xl_format[index]["IP"])
+        return DP_IP_List
 
     def get_Policy_Name(self, index):
         xl_format = self.read_table("Policy Editor")
@@ -56,7 +64,8 @@ class Excel_Handler:
     def get_CDN_Method(self, index):
         xl_format = self.read_table("Policy Editor")
         CDN_Type = xl_format[index]["CDN Method"]
-        if pd.isna(CDN_Type) == False:
+        #CDN_Flag = self.get_CDN_Flag_Status[index]
+        if pd.isna(CDN_Type) == False or CDN_Type == "":
             return CDN_Type
         else:
             return False
@@ -101,3 +110,6 @@ v1 = Excel_Handler("server_test.xlsm")
 #v1.create_net_class_dic()
 #v1.get_BDoS_profile_details()
 #v1.get_CDN_Flag_Status(1)
+# v1.get_DP_IP_detalis()
+a =v1.get_CDN_Method(0)
+print(a)

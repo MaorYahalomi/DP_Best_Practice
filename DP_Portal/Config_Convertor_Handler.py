@@ -301,7 +301,11 @@ class Config_Convertor_Handler:
             Policy_priorty +=5
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
-            
+
+    def get_dp_list(self):
+        DP_list = self.configuration_book.get_DP_IP_detalis()
+        return DP_list
+
 def create_single_Syn_dic(Syn_Profile_name, application_type,Global_syn_flag):
         
     if Global_syn_flag == False:
@@ -637,7 +641,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
     
     if Behind_CDN == "Yes":
         list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
-        # print(list_of_cdn_option)
+        #print(list_of_cdn_option)
     
     if policy_type == "basic_app":
         Policy_basic_body = {
@@ -771,7 +775,7 @@ def Create_CDN_Option_Dict(CDN_Method):
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr":"1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr":"1"})
         CDN_List_Options.append({"rsIDSNewRulesCdnForwardedHdr": "2"}) 
-    if CDN_Method == "CDN only- True-Client":
+    if CDN_Method == "CDN only - True-Client":
         CDN_List_Options.append({"rsIDSNewRulesCdnHdrNotFoundFallback": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnXForwardedForHdr": "2"})
         CDN_List_Options.append({"rsIDSNewRulesCdnTrueClientIpHdr": "1"})
@@ -812,6 +816,7 @@ def create_ntp_srv_body(NTP_IP):
 
     return NTP_IP_body, NTP_Enable_body
 
+
 d1 = Config_Convertor_Handler()
 #d1.create_ntp_config()
 #d1.print_table("Network Classes")
@@ -820,4 +825,3 @@ d1 = Config_Convertor_Handler()
     #d1.create_Syn_Profile_dic()
     #d1.create_Protections_Per_Policy_dic()
     #d1.create_Singature_Profile_dic()
-#Create_CDN_Option_Dict("CDN only - True-Client + XFF")
