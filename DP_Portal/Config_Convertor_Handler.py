@@ -160,16 +160,15 @@ class Config_Convertor_Handler:
         # Creats List of dictorney AS Profile configuration
 
         AS_Profile_list = []
-        # AS_Profile_xl_format = self.configuration_book.read_table(
-        #     "Policy Editor")
+       
         AS_Profile_xl_format = self.policy_editor_book
-        
+        symetric_flag = self.configuration_book.get_env_symetric_detalis()
         for index in range(len(AS_Profile_xl_format)):
             Application_type = self.configuration_book.get_application_type(
                 index)
             Policy_Name = self.configuration_book.get_Policy_Name(
                 index)
-            if Policy_Name != False and Application_type != "Global":
+            if Policy_Name != False and Application_type != "Global" and symetric_flag == "Yes":
                AS_Profile_list.append(
                    create_single_AS_dic(Policy_Name))
         return AS_Profile_list
@@ -267,6 +266,7 @@ class Config_Convertor_Handler:
         signature_list = ["DoS-All", "Corp-DMZ-Web", "Corp-DMZ-Mail"]
         Protection_per_policy_list = []
         protections_xl_format = self.policy_editor_book
+        symetric_flag = self.configuration_book.get_env_symetric_detalis()
         for index in range(len(protections_xl_format)):
             application_type = self.configuration_book.get_application_type(
                 index)
@@ -290,12 +290,12 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[0]
 
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag))
 
                 if policy_type == "DNS_app":
                     signature_selected = f"{Policy_Name}_dns_cust"
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag))
             Policy_priorty +=10
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
@@ -635,11 +635,10 @@ def protection_per_policy_check(application_type):
         app_type_response = "Global"
         return app_type_response
 
-def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net,Behind_CDN,CDN_Method):
+def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net, Behind_CDN, CDN_Method, symetric_flag):
     
     if Behind_CDN == "Yes":
         list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
-    
     if policy_type == "basic_app":
         Policy_basic_body = {
             "rsIDSNewRulesState": "1",
@@ -651,7 +650,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesPortmask": "",
             "rsIDSNewRulesDirection": "1",
             "rsIDSNewRulesVlanTagGroup": "",
-            "rsIDSNewRulesProfileScanning": f"{Policy_Name}_auto_as",
+            "rsIDSNewRulesProfileScanning": f"{Policy_Name}_auto_as" if symetric_flag == "Yes" else "",
             "rsIDSNewRulesProfileNetflood": f"{Policy_Name}_auto_BDoS",
             "rsIDSNewRulesProfileConlmt": "",
             "rsIDSNewRulesProfilePpsRateLimit": "",
@@ -826,4 +825,5 @@ d1 = Config_Convertor_Handler()
 #d1.create_ntp_config()
 #d1.print_table("Network Classes")
 #d1.create_net_class_list()
+# d1.create_AS_Profile_dic()
  

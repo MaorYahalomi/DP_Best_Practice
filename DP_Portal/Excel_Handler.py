@@ -35,6 +35,14 @@ class Excel_Handler:
         for index in range(len(dp_list_type_xl_format)):
             DP_IP_List.append(dp_list_type_xl_format[index]["IP"])
         return DP_IP_List
+    
+    def get_env_symetric_detalis(self):
+        dp_list_type_xl_format = self.read_table("Global Information")
+        sym_flag = dp_list_type_xl_format[0]["Is Environment symetrics?"]
+        if pd.isna(sym_flag) == False:
+         return sym_flag
+        else:
+            return False
 
     def get_Policy_Name(self, index):
         xl_format = self.read_table("Policy Editor")
@@ -108,3 +116,4 @@ class Excel_Handler:
 v1 = Excel_Handler("server_test.xlsm")
 #v1.create_net_class_dic()
 #v1.get_BDoS_profile_details()
+v1.get_env_symetric_detalis()

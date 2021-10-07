@@ -11,9 +11,9 @@ import json
 import time
 import timeit
 
-Vision_IP = "10.213.17.49"
-Vision_user = "radware"
-Vision_password = "radware"
+# Vision_IP = "10.213.17.49"
+# Vision_user = "radware"
+# Vision_password = "radware"
 #DP_IP = "10.213.17.52"
 
 class Vision:
@@ -361,19 +361,23 @@ def DP_config(vision_obj,dp_ip):
 
 if __name__ == "__main__":
 	
-	# Vision_IP = input("Enter Vision IP: ")
-	# Vision_user = input("Enter Vision User: ")
-	# Vision_password = getpass.getpass("Enter Vision Password: ")
+	Vision_IP = input("Enter Vision IP: ")
+	Vision_user = input("Enter Vision User: ")
+	Vision_password = getpass.getpass("Enter Vision Password: ")
+
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
-	start_runtime = timeit.default_timer()
 	DefensePro_list = vision_obj.config_file.get_dp_list()
+	start_runtime = timeit.default_timer()
 	for index in range(len(DefensePro_list)):
 	 DP_config(vision_obj,DefensePro_list[index])
 	stop_runtime = timeit.default_timer()
 	print('Running Time: ', stop_runtime - start_runtime)
+	#DP_config(vision_obj, DefensePro_list[0])
+
 	# Old Functios:
 		# vision_obj.lock_device(DefensePro_list[0])
 		# vision_obj.net_class_config(DefensePro_list[0])
 		# vision_obj.Policy_config(DefensePro_list[0])
 		# vision_obj.update_policy(DefensePro_list[0])
 	#vision_obj.Delete_configuration(DefensePro_list[0])
+	# vision_obj.Delete_configuration(DefensePro_list[1])
