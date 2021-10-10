@@ -11,10 +11,6 @@ import json
 import time
 import timeit
 
-# Vision_IP = "10.213.17.49"
-# Vision_user = "radware"
-# Vision_password = "radware"
-#DP_IP = "10.213.17.52"
 
 class Vision:
 
@@ -153,6 +149,16 @@ class Vision:
 		print(f" NTP Enable Response --> {ntp_enable_res.status_code}")
 		print("\n"+"*"*30+"\n")
 
+	def Syslog_server_config(self, dp_ip):
+		Syslog_config_file = self.config_file.create_syslog_config()
+		print("Syslog Server Configurations\n")
+		for index in range(len(Syslog_config_file)):
+			sys_srv_url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rdwrSyslogServerTable/{Syslog_config_file[index]['rdwrSyslogServerAddress']}"
+			syslog_body = json.dumps(Syslog_config_file[index])	
+			syslog_res = self.session.post(sys_srv_url, data=syslog_body, verify=False)
+			print(f" Syslog Configuration Response --> {syslog_res.status_code}")
+		print("\n"+"*"*30+"\n")
+
 	def SYN_profile_config(self, dp_ip):
 		SYN_config_file = self.config_file.create_Syn_Profile_dic()
 		print("SYN Profile Configurations\n")
@@ -266,6 +272,7 @@ class Vision:
 		DNS_Singature_Profiles_Dict = self.config_file.create_Custom_DNS_Singature_Profile_dic()
 		DNS_Flood_Profiles_Dict = self.config_file.create_DNS_Profile_dic()
 		NTP_Flag = self.config_file.create_ntp_config()
+		Syslog_Flag = self.config_file.create_syslog_config()
 		#Checks if Custom FTP Singature profile is requierd or not
 		if DNS_Singature_Profiles_Dict:
 			self.FTP_SIG_config(dp_ip)
@@ -278,14 +285,21 @@ class Vision:
 		#Checks if NTP Server is requierd or not
 		if NTP_Flag:
 			self.NTP_server_config(dp_ip)
+		#Checks if Syslog Server is requierd or not
+		if Syslog_Flag:
+			self.Syslog_server_config(dp_ip)
 
-		print("Policy Configurations\n")
-		print(f"Configure DP: {dp_ip}")
+		print("Policy Configurations Summary:\n")
+		print(f"Configure DP: {dp_ip}:\n")
 		for index in range(len(Policy_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsIDSNewRulesTable/{Policy_config_file[index]['rsIDSNewRulesName']}/"
 			Policy_profile_body = json.dumps(Policy_config_file[index])
 			response = self.session.post(url, data=Policy_profile_body, verify=False)
-			print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+			if response.status_code == 200:
+				print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+			elif response.status_code == 500:
+				if "not found" in json.loads(response.text)['message'].split(':')[1]:
+					print(f"Error in Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {json.loads(response.text)['message'].split(':')[1]}")
 		print("\n"+"*"*30+"\n")
 
 	def Del_Policy_config(self, dp_ip):
@@ -361,17 +375,23 @@ def DP_config(vision_obj,dp_ip):
 
 if __name__ == "__main__":
 	
-	Vision_IP = input("Enter Vision IP: ")
-	Vision_user = input("Enter Vision User: ")
-	Vision_password = getpass.getpass("Enter Vision Password: ")
+	# Vision_IP = input("Enter Vision IP: ")
+	# Vision_user = input("Enter Vision User: ")
+	# Vision_password = getpass.getpass("Enter Vision Password: ")
 
+	Vision_IP = "10.213.17.49"
+	Vision_user = "radware"
+	Vision_password = "radware"
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
+	#DP_config(vision_obj, DefensePro_list[0])
 	start_runtime = timeit.default_timer()
 	for index in range(len(DefensePro_list)):
 	 DP_config(vision_obj,DefensePro_list[index])
 	stop_runtime = timeit.default_timer()
 	print('Running Time: ', stop_runtime - start_runtime)
+
+
 	#DP_config(vision_obj, DefensePro_list[0])
 
 	# Old Functios:
@@ -379,5 +399,10 @@ if __name__ == "__main__":
 		# vision_obj.net_class_config(DefensePro_list[0])
 		# vision_obj.Policy_config(DefensePro_list[0])
 		# vision_obj.update_policy(DefensePro_list[0])
-	#vision_obj.Delete_configuration(DefensePro_list[0])
-	# vision_obj.Delete_configuration(DefensePro_list[1])
+# vision_obj.Delete_configuration(DefensePro_list[0])
+# vision_obj.Delete_configuration(DefensePro_list[1])
+
+
+#Check:
+# https://10.213.17.49/mgmt/system/config/itemlist/devicesubscriptions
+
