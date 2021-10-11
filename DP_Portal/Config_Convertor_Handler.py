@@ -283,12 +283,14 @@ class Config_Convertor_Handler:
         protections_xl_format = self.policy_editor_book
         symetric_flag = self.configuration_book.get_env_symetric_detalis()
         for index in range(len(protections_xl_format)):
+
             application_type = self.configuration_book.get_application_type(
                 index)
             CDN_Flag = self.configuration_book.get_CDN_Flag_Status(index)
             CDN_Method = self.configuration_book.get_CDN_Method(index)
             Policy_Name = self.configuration_book.get_Policy_Name(index)
             dest_net_per_policy = protections_xl_format[index]["DST Networks Name"]
+
             if Policy_Name != False:
                 policy_type = protection_per_policy_check(self.configuration_book.get_application_type(index))
                 if policy_type == "basic_app" or policy_type == "Global":
@@ -299,7 +301,6 @@ class Config_Convertor_Handler:
                     elif application_type == "SMTP":
                         signature_selected = signature_list[2]
                     elif application_type == "FTP":
-                        # Need to Change Signature!!
                         signature_selected = f"{Policy_Name}_FTP_cust"            
                     elif application_type == "Global":
                         signature_selected = signature_list[0]
@@ -514,7 +515,7 @@ def create_single_DNS_dic(DNS_Profile_Name, Expect_QPS, Allow_Max):
         "rsDnsProtProfileManualTriggerMaxQpsTarget": "0",
         "rsDnsProtProfileManualTriggerEscalatePeriod": "3",
         "rsDnsProtProfileLearningSuppressionThreshold": "0",
-        "rsDnsProtProfileFootprintStrictness": "0"
+        "rsDnsProtProfileFootprintStrictness": "1"
     }
     return dns_profile_body
 
@@ -834,8 +835,6 @@ def create_ntp_srv_body(NTP_IP):
     }
 
     return NTP_IP_body, NTP_Enable_body
-
-
 
 def create_syslog_srv_body(syslog_IP):
 

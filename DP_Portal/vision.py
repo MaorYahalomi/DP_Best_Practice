@@ -364,8 +364,8 @@ class Vision:
 def DP_config(vision_obj,dp_ip):
 
 	vision_obj.lock_device(dp_ip)
-	vision_obj.net_class_config(dp_ip)
-	vision_obj.Protection_config(dp_ip)
+	# vision_obj.net_class_config(dp_ip)
+	# vision_obj.Protection_config(dp_ip)
 	vision_obj.Policy_config(dp_ip)
 	vision_obj.update_policy(dp_ip)
 	time.sleep(3.0)
@@ -384,7 +384,7 @@ if __name__ == "__main__":
 	Vision_password = "radware"
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
-	#DP_config(vision_obj, DefensePro_list[0])
+	DP_config(vision_obj, DefensePro_list[0])
 	start_runtime = timeit.default_timer()
 	for index in range(len(DefensePro_list)):
 	 DP_config(vision_obj,DefensePro_list[index])
@@ -394,11 +394,7 @@ if __name__ == "__main__":
 
 	#DP_config(vision_obj, DefensePro_list[0])
 
-	# Old Functios:
-		# vision_obj.lock_device(DefensePro_list[0])
-		# vision_obj.net_class_config(DefensePro_list[0])
-		# vision_obj.Policy_config(DefensePro_list[0])
-		# vision_obj.update_policy(DefensePro_list[0])
+
 # vision_obj.Delete_configuration(DefensePro_list[0])
 # vision_obj.Delete_configuration(DefensePro_list[1])
 
