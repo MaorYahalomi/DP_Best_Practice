@@ -70,6 +70,15 @@ class Config_Convertor_Handler:
         NTP_config_list.append(create_ntp_srv_body(NTP_IP))
         return NTP_config_list
 
+    def create_syslog_config(self):
+
+        Syslog_config_list = []
+        Syslog_IP = self.configuration_book.get_syslog_server(0)
+        list_of_IP = Syslog_IP.split(",")
+        for index in range(len(list_of_IP)):
+         Syslog_config_list.append(create_syslog_srv_body(list_of_IP[index]))
+        return Syslog_config_list
+
     def create_BDoS_Profile_dic(self):
         BDoS_Profile_list = []
         # net_class_xl_format = self.configuration_book.read_table(
@@ -81,10 +90,13 @@ class Config_Convertor_Handler:
                 index)
             Application = self.configuration_book.get_application_type(index)
             if Policy_Name != False:
-                if math.isnan(BDos_BW) == False:
-                    if protection_per_application_check(Application) or Application == "DNS":
-                        BDoS_Profile_list.append(
-                            create_single_BDoS_dic(Policy_Name, int(BDos_BW)))
+                try:
+                    if math.isnan(BDos_BW) == False:
+                        if protection_per_application_check(Application) or Application == "DNS":
+                            BDoS_Profile_list.append(
+                                create_single_BDoS_dic(Policy_Name, int(BDos_BW)))
+                except TypeError:
+                     print(f"TypeError: Must enter a valid number --> in {Policy_Name} BDoS profile ")
         
         return BDoS_Profile_list
     
@@ -99,10 +111,13 @@ class Config_Convertor_Handler:
                 index)
             Application_type = self.configuration_book.get_application_type(index)
             if Policy_Name != False:
-                if Application_type == "DNS":
-                    if math.isnan(DNS_Expected_QPS) == False and math.isnan(DNS_Max_QPS) == False:
-                        DNS_Profile_list.append(
-                            create_single_DNS_dic(Policy_Name, int(DNS_Expected_QPS), int(DNS_Max_QPS)))
+                    if Application_type == "DNS":
+                        try:
+                            if math.isnan(DNS_Expected_QPS) == False and math.isnan(DNS_Max_QPS) == False:
+                                DNS_Profile_list.append(
+                                    create_single_DNS_dic(Policy_Name, int(DNS_Expected_QPS), int(DNS_Max_QPS)))
+                        except TypeError:
+                            print(f"TypeError: Must enter a valid number --> in {Policy_Name} DNS profile ")
         
         return DNS_Profile_list
 
@@ -819,6 +834,24 @@ def create_ntp_srv_body(NTP_IP):
     }
 
     return NTP_IP_body, NTP_Enable_body
+
+
+
+def create_syslog_srv_body(syslog_IP):
+
+    Syslog_body = {
+        "rdwrSyslogServerStatus": "1",
+        "rdwrSyslogServerAddress": syslog_IP,
+        "rdwrSyslogServerProtocol": "1",
+        "rdwrSyslogServerDstPort": "514",
+        "rdwrSyslogServerSrcPort": "514",
+        "rdwrSyslogServerFacility": "22",
+        "rdwrSyslogSecuritySending": "1",
+        "rdwrSyslogHealthSending": "1",
+        "rdwrSyslogUserAuditSending": "1"
+    }
+
+    return Syslog_body
 
 
 d1 = Config_Convertor_Handler()

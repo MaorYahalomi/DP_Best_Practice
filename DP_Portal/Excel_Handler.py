@@ -85,6 +85,14 @@ class Excel_Handler:
         else:
             return False
 
+    def get_syslog_server(self, index):
+        xl_format = self.read_table("Global Information")
+        syslog_ip = xl_format[index]["Syslog Server"]
+        if pd.isna(syslog_ip) == False:
+            return syslog_ip
+        else:
+            return False
+
     def check_multi_network(self):
         #Function Description:
             # Checks which networks class contains multiple entries,
