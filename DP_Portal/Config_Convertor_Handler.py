@@ -235,8 +235,10 @@ class Config_Convertor_Handler:
                 index)
             if Policy_Name != False:
                 if Application_type == "DNS":
-                    Dns_Sig_Profile_list.append(
-                        create_custom_signature(Policy_Name, Application_type))
+                    #Checks if the list has already singature
+                    if not Dns_Sig_Profile_list:
+                        Dns_Sig_Profile_list.append(
+                            create_custom_signature(Application_type))
         return Dns_Sig_Profile_list
         
     def create_Custom_FTP_Singature_Profile_dic(self):
@@ -252,10 +254,69 @@ class Config_Convertor_Handler:
                 index)
             if Policy_Name != False:
                 if Application_type == "FTP":
-                    FTP_Sig_Profile_list.append(
-                        create_custom_signature(Policy_Name, Application_type))
+                    #Checks if the list has already singature
+                    if not FTP_Sig_Profile_list:
+                        FTP_Sig_Profile_list.append(
+                            create_custom_signature(Application_type))
         return FTP_Sig_Profile_list
-    
+
+    def create_Custom_HTTP_Singature_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney Sig Profile configuration
+        HTTP_Profile_list = []
+        Sig_Profile_xl_format = self.policy_editor_book
+
+        for index in range(len(Sig_Profile_xl_format)):
+            Application_type = self.configuration_book.get_application_type(
+                index)
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+                if Application_type == "HTTP":
+                    #Checks if the list has already singature
+                    if not HTTP_Profile_list:
+                        HTTP_Profile_list.append(
+                            create_custom_signature(Application_type))
+        return HTTP_Profile_list
+
+    def create_Custom_HTTPS_Singature_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney Sig Profile configuration
+        HTTPS_Profile_list = []
+        Sig_Profile_xl_format = self.policy_editor_book
+
+        for index in range(len(Sig_Profile_xl_format)):
+            Application_type = self.configuration_book.get_application_type(
+                index)
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+                if Application_type == "HTTPS":
+                    #Checks if the list has already singature
+                    if not HTTPS_Profile_list:
+                        HTTPS_Profile_list.append(
+                            create_custom_signature(Application_type))
+        return HTTPS_Profile_list
+
+    def create_Custom_Mail_Singature_Profile_dic(self):
+        # Function Description:
+        # Creats List of dictorney Sig Profile configuration
+        Mail_Profile_list = []
+        Sig_Profile_xl_format = self.policy_editor_book
+
+        for index in range(len(Sig_Profile_xl_format)):
+            Application_type = self.configuration_book.get_application_type(
+                index)
+            Policy_Name = self.configuration_book.get_Policy_Name(
+                index)
+            if Policy_Name != False:
+                if Application_type == "SMTP":
+                    #Checks if the list has already singature
+                    if not Mail_Profile_list:
+                        Mail_Profile_list.append(
+                            create_custom_signature(Application_type))
+        return Mail_Profile_list
+
     def create_HTTPS_Profile_dic(self):
         # Function Description:
         # Creats List of dictorney HTTPS Profile configuration
@@ -274,7 +335,8 @@ class Config_Convertor_Handler:
                HTTPS_Profile_list.append(
                    create_single_HTTPS_dic(Policy_Name,full_inspection_flag))
         return HTTPS_Profile_list
-
+    
+    
     def create_Protections_Per_Policy_dic(self):
         
         Policy_priorty = 10
@@ -296,12 +358,14 @@ class Config_Convertor_Handler:
                 if policy_type == "basic_app" or policy_type == "Global":
                     # print(application_type)
                     #Basic Application Policy Section:
-                    if application_type == "HTTP" or application_type == "HTTPS":
-                        signature_selected = signature_list[1]
+                    if application_type == "HTTP":
+                        signature_selected = "HTTP_Custom"
+                    elif application_type == "HTTPS":
+                        signature_selected = "HTTPS_Custom"
                     elif application_type == "SMTP":
-                        signature_selected = signature_list[2]
+                        signature_selected = "Mail_Custom"
                     elif application_type == "FTP":
-                        signature_selected = f"{Policy_Name}_FTP_cust"            
+                        signature_selected = "FTP_Custom"            
                     elif application_type == "Global":
                         signature_selected = signature_list[0]
 
@@ -309,7 +373,7 @@ class Config_Convertor_Handler:
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag))
 
                 if policy_type == "DNS_app":
-                    signature_selected = f"{Policy_Name}_dns_cust"
+                    signature_selected = "DNS_Custom"
                     Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag))
             Policy_priorty +=10
@@ -342,7 +406,8 @@ def create_single_Syn_dic(Syn_Profile_name, application_type,Global_syn_flag):
             "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
             "rsIDSSynProfileTCPResetStatus": "1",
             "rsIDSSynProfilesParamsWebEnable": "1",
-            #Enables JavaScript Challenge:
+            #Enables JavaScript Challenge = 2:
+            #Enables 302 Challenge = 1:
             "rsIDSSynProfilesParamsWebMethod": "2"
         }
         syn_paramaters_body_HTTPS = {
@@ -543,78 +608,176 @@ def create_single_GEO_dic(GEO_Profile_name):
 
     return GEO_profile_body
 
-def create_custom_signature(Policy_name,application):
+def create_custom_signature(application):
 
     if application == "DNS":    
         DNS_service_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
+            "rsIDSSignaturesProfileName": "DNS_Custom",
             "rsIDSSignaturesProfileRuleName": "1",
             "rsIDSSignaturesProfileRuleAttributeType": "Services",
             "rsIDSSignaturesProfileRuleAttributeName": "Network Services-DNS"
         }
         
         Complexity_low_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
+            "rsIDSSignaturesProfileName": "DNS_Custom",
             "rsIDSSignaturesProfileRuleName": "1",
             "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
             "rsIDSSignaturesProfileRuleAttributeName": "Low"
         }
-
-        # Dos Signature Configuarion
-        Threat_Floods_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
-            "rsIDSSignaturesProfileRuleName": "2",
-            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
-            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Floods"
-        }
-        Threat_Slow_rate_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
-            "rsIDSSignaturesProfileRuleName": "2",
-            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
-            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Slow Rate"
-        }
-        Threat_Vulenr_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_dns_cust",
-            "rsIDSSignaturesProfileRuleName": "2",
-            "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
-            "rsIDSSignaturesProfileRuleAttributeName": "DoS - Vulnerability"
-        }
+        Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body = create_DOS_All_custom_signature(application)
         return DNS_service_body, Complexity_low_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
 
     if application == "FTP":
         FTP_service_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileName": "FTP_Custom",
             "rsIDSSignaturesProfileRuleName": "1",
             "rsIDSSignaturesProfileRuleAttributeType": "Services",
             "rsIDSSignaturesProfileRuleAttributeName": "File Transfer-FTP"
         }
 
         FTP_Complexity_low_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileName": "FTP_Custom",
             "rsIDSSignaturesProfileRuleName": "1",
             "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
             "rsIDSSignaturesProfileRuleAttributeName": "Low"
         }
         # Dos Signature Configuarion
+        Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body = create_DOS_All_custom_signature(application)
+        return FTP_service_body, FTP_Complexity_low_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
+
+    if application == "HTTP":
+        HTTP_service_body = {
+            "rsIDSSignaturesProfileName": "HTTP_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Services",
+            "rsIDSSignaturesProfileRuleAttributeName": "Web-HTTP"
+        }
+
+        Complexity_low_body = {
+            "rsIDSSignaturesProfileName": "HTTP_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
+            "rsIDSSignaturesProfileRuleAttributeName": "Low"
+        }
+
+        Confidance_body = {
+            "rsIDSSignaturesProfileName":  "HTTP_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Confidence",
+            "rsIDSSignaturesProfileRuleAttributeName": "High"
+        }
+
+        Risk_body = {
+            "rsIDSSignaturesProfileName":  "HTTP_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Risk",
+            "rsIDSSignaturesProfileRuleAttributeName": "High"
+        }
+
+        # Dos Signature Configuarion
+        Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body = create_DOS_All_custom_signature(application)
+        return HTTP_service_body, Complexity_low_body, Confidance_body, Risk_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
+    
+    if application == "HTTPS":
+        HTTP_service_body = {
+            "rsIDSSignaturesProfileName": "HTTPS_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Services",
+            "rsIDSSignaturesProfileRuleAttributeName": "Web-HTTPS"
+        }
+
+        Complexity_low_body = {
+            "rsIDSSignaturesProfileName": "HTTPS_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
+            "rsIDSSignaturesProfileRuleAttributeName": "Low"
+        }
+
+        Confidance_body = {
+            "rsIDSSignaturesProfileName":  "HTTPS_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Confidence",
+            "rsIDSSignaturesProfileRuleAttributeName": "High"
+        }
+
+        Risk_body = {
+            "rsIDSSignaturesProfileName":  "HTTPS_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Risk",
+            "rsIDSSignaturesProfileRuleAttributeName": "High"
+        }
+
+        # Dos Signature Configuarion
+        Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body = create_DOS_All_custom_signature(application)
+        return HTTP_service_body, Complexity_low_body, Confidance_body, Risk_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
+    
+    if application == "SMTP":
+
+        Mail_service_IMAP = {
+            "rsIDSSignaturesProfileName": "Mail_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Services",
+            "rsIDSSignaturesProfileRuleAttributeName": "Mail-IMAP"
+        }
+        Mail_service_POP3 = {
+            "rsIDSSignaturesProfileName": "Mail_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Services",
+            "rsIDSSignaturesProfileRuleAttributeName": "Mail-POP3"
+        }
+        Mail_service_SMTP = {
+             "rsIDSSignaturesProfileName": "Mail_Custom",
+             "rsIDSSignaturesProfileRuleName": "1",
+             "rsIDSSignaturesProfileRuleAttributeType": "Services",
+             "rsIDSSignaturesProfileRuleAttributeName": "Mail-SMTP"
+         }
+
+        Complexity_low_body = {
+            "rsIDSSignaturesProfileName": "Mail_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Complexity",
+            "rsIDSSignaturesProfileRuleAttributeName": "Low"
+        }
+        Confidance_body = {
+            "rsIDSSignaturesProfileName": "Mail_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Confidence",
+            "rsIDSSignaturesProfileRuleAttributeName": "High"
+        }
+        Risk_body = {
+            "rsIDSSignaturesProfileName": "Mail_Custom",
+            "rsIDSSignaturesProfileRuleName": "1",
+            "rsIDSSignaturesProfileRuleAttributeType": "Risk",
+            "rsIDSSignaturesProfileRuleAttributeName": "High"
+        }
+
+        # Dos Signature Configuarion
+        Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body = create_DOS_All_custom_signature(application)
+        return Mail_service_IMAP, Mail_service_POP3, Mail_service_SMTP, Complexity_low_body, Confidance_body, Risk_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
+    
+def create_DOS_All_custom_signature(application):
+
+     # Dos All Signature Configuarion
         Threat_Floods_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileName": f"{application}_Custom",
             "rsIDSSignaturesProfileRuleName": "2",
             "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
             "rsIDSSignaturesProfileRuleAttributeName": "DoS - Floods"
         }
         Threat_Slow_rate_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileName": f"{application}_Custom",
             "rsIDSSignaturesProfileRuleName": "2",
             "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
             "rsIDSSignaturesProfileRuleAttributeName": "DoS - Slow Rate"
         }
         Threat_Vulenr_body = {
-            "rsIDSSignaturesProfileName": f"{Policy_name}_FTP_cust",
+            "rsIDSSignaturesProfileName": f"{application}_Custom",
             "rsIDSSignaturesProfileRuleName": "2",
             "rsIDSSignaturesProfileRuleAttributeType": "Threat Type",
             "rsIDSSignaturesProfileRuleAttributeName": "DoS - Vulnerability"
         }
-        return FTP_service_body, FTP_Complexity_low_body, Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
+
+        return Threat_Floods_body, Threat_Slow_rate_body, Threat_Vulenr_body
 
 def create_single_HTTPS_dic(HTTPS_Profile_name,full_inspection_flag):
    
@@ -858,4 +1021,3 @@ d1 = Config_Convertor_Handler()
 #d1.print_table("Network Classes")
 #d1.create_net_class_list()
 # d1.create_AS_Profile_dic()
- 
