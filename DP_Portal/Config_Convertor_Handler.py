@@ -1016,8 +1016,9 @@ def create_syslog_srv_body(syslog_IP):
     return Syslog_body
 
 
-d1 = Config_Convertor_Handler()
-#d1.create_ntp_config()
-#d1.print_table("Network Classes")
-#d1.create_net_class_list()
-# d1.create_AS_Profile_dic()
+#Testing
+    # d1 = Config_Convertor_Handler()
+    #d1.create_ntp_config()
+    #d1.print_table("Network Classes")
+    #d1.create_net_class_list()
+    # d1.create_AS_Profile_dic()

@@ -541,17 +541,17 @@ def BP_Tool_run(vision_obj,DP_list):
 
 if __name__ == "__main__":
 	
-	# Vision_IP = input("Enter Vision IP: ")
-	# Vision_user = input("Enter Vision User: ")
-	# Vision_password = getpass.getpass("Enter Vision Password: ")
+	Vision_IP = input("Enter Vision IP: ")
+	Vision_user = input("Enter Vision User: ")
+	Vision_password = getpass.getpass("Enter Vision Password: ")
 
-	Vision_IP = "10.213.17.49"
-	Vision_user = "radware"
-	Vision_password = "radware"
+	# Vision_IP = "10.213.17.49"
+	# Vision_user = "radware"
+	# Vision_password = "radware"
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
 	BP_Tool_run(vision_obj,DefensePro_list)
-	
+
 	# DP_config(vision_obj, DefensePro_list[0])
 	# DP_config(vision_obj, DefensePro_list[1])
 	# vision_obj.Delete_configuration(DefensePro_list[0])
