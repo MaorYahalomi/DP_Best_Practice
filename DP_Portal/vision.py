@@ -43,7 +43,7 @@ class Vision:
 		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
 		response = self.session.post(url, verify=False)
 		print(f"Lock Device {dp_ip} --> {response.status_code}")
-		print("\n"+"*"*10+"\n")
+		print("\n"+"*"*30+"\n")
 
 	def update_policy(self,dp_ip):
 		self.lock_device(dp_ip)
@@ -408,8 +408,6 @@ class Vision:
 	  time.sleep(delay_time)
 	  self.SYN_profile_config(dp_ip)
 	  time.sleep(delay_time)
-	  self.AS_profile_config(dp_ip)
-	  time.sleep(delay_time)
 	  self.update_policy(dp_ip)
 	  time.sleep(delay_time)
 
@@ -448,7 +446,6 @@ class Vision:
 		#Checks if Syslog Server is requierd or not
 		if Syslog_Flag:
 			self.Syslog_server_config(dp_ip)
-
 		print("Policy Configurations Summary:\n")
 		print(f"Configure DP: {dp_ip}:\n")
 		for index in range(len(Policy_config_file)):
@@ -459,6 +456,8 @@ class Vision:
 				print(f"Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
 			elif response.status_code == 500:
 				if "not found" in json.loads(response.text)['message'].split(':')[1]:
+					print(f"Error in Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {json.loads(response.text)['message'].split(':')[1]}")
+				elif "valid" in json.loads(response.text)['message'].split(':')[1]:
 					print(f"Error in Creating Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {json.loads(response.text)['message'].split(':')[1]}")
 		print("\n"+"*"*30+"\n")
 
@@ -524,6 +523,7 @@ class Vision:
 def DP_config(vision_obj,dp_ip):
 
 	vision_obj.lock_device(dp_ip)
+	time.sleep(1.5)
 	vision_obj.net_class_config(dp_ip)
 	vision_obj.Protection_config(dp_ip)
 	vision_obj.Policy_config(dp_ip)
@@ -551,8 +551,11 @@ if __name__ == "__main__":
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
 	BP_Tool_run(vision_obj,DefensePro_list)
+	
 	# DP_config(vision_obj, DefensePro_list[0])
+	# DP_config(vision_obj, DefensePro_list[1])
 	# vision_obj.Delete_configuration(DefensePro_list[0])
+	# vision_obj.Delete_configuration(DefensePro_list[1])
 
 
 #Check:

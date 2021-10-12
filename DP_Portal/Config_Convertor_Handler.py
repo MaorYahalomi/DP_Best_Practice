@@ -335,8 +335,7 @@ class Config_Convertor_Handler:
                HTTPS_Profile_list.append(
                    create_single_HTTPS_dic(Policy_Name,full_inspection_flag))
         return HTTPS_Profile_list
-    
-    
+       
     def create_Protections_Per_Policy_dic(self):
         
         Policy_priorty = 10
@@ -391,8 +390,9 @@ def create_single_Syn_dic(Syn_Profile_name, application_type,Global_syn_flag):
             "rsIDSSynProfilesParamsName": f"{Syn_Profile_name}_auto_syn",
             "rsIDSSynProfileTCPResetStatus": "1",
             "rsIDSSynProfilesParamsWebEnable": "1",
-            #Enables JavaScript Challenge:
-            "rsIDSSynProfilesParamsWebMethod": "2"
+            #Enables JavaScript Challenge = 2 :
+            #Enables 302 Challenge = 1 :
+            "rsIDSSynProfilesParamsWebMethod": "1"
         }
         syn_paramaters_body = {
             "rsIDSSynProfilesName": f"{Syn_Profile_name}_auto",
@@ -408,7 +408,7 @@ def create_single_Syn_dic(Syn_Profile_name, application_type,Global_syn_flag):
             "rsIDSSynProfilesParamsWebEnable": "1",
             #Enables JavaScript Challenge = 2:
             #Enables 302 Challenge = 1:
-            "rsIDSSynProfilesParamsWebMethod": "2"
+            "rsIDSSynProfilesParamsWebMethod": "1"
         }
         syn_paramaters_body_HTTPS = {
             "rsIDSSynProfilesName": f"{Syn_Profile_name}_auto",
@@ -537,7 +537,7 @@ def create_single_BDoS_dic(BDoS_Profile_Name, BDoS_Profile_BW):
   						"rsNetFloodProfileNoBurstTimeout": "30",
   						"rsNetFloodProfileOverMitigationStatus": "2",
   						"rsNetFloodProfileOverMitigationThreshold": "25",
-  						"rsNetFloodProfileLearningSuppressionThreshold": "25",
+  						"rsNetFloodProfileLearningSuppressionThreshold": "0",
   						"rsNetFloodProfileFootprintStrictness": "1",
   						"rsNetFloodProfileRateLimit": "0",
   						"rsNetFloodProfileUserDefinedRateLimit": "0",
@@ -829,7 +829,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesPortmask": "",
             "rsIDSNewRulesDirection": "1",
             "rsIDSNewRulesVlanTagGroup": "",
-            "rsIDSNewRulesProfileScanning": f"{Policy_Name}_auto_as" if symetric_flag == "Yes" else "",
+            "rsIDSNewRulesProfileScanning": "",
             "rsIDSNewRulesProfileNetflood": f"{Policy_Name}_auto_BDoS",
             "rsIDSNewRulesProfileConlmt": "",
             "rsIDSNewRulesProfilePpsRateLimit": "",
@@ -846,7 +846,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesCdnHandlingSig": "2",
             "rsIDSNewRulesCdnHandlingSyn": "1",
             "rsIDSNewRulesCdnHandlingTF": "2",
-            "rsIDSNewRulesCdnAction": "1",
+            "rsIDSNewRulesCdnAction": "3",
             "rsIDSNewRulesCdnTrueClientIpHdr": list_of_cdn_option[2]["rsIDSNewRulesCdnTrueClientIpHdr"] if Behind_CDN == "Yes" else "1",
             "rsIDSNewRulesCdnXForwardedForHdr": list_of_cdn_option[1]["rsIDSNewRulesCdnXForwardedForHdr"] if Behind_CDN == "Yes" else "1",
             "rsIDSNewRulesCdnForwardedHdr": list_of_cdn_option[3]["rsIDSNewRulesCdnForwardedHdr"] if Behind_CDN == "Yes" else "1",
@@ -886,7 +886,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesCdnHandlingSig": "2",
             "rsIDSNewRulesCdnHandlingSyn": "1",
             "rsIDSNewRulesCdnHandlingTF": "2",
-            "rsIDSNewRulesCdnAction": "1",
+            "rsIDSNewRulesCdnAction": "3",
             "rsIDSNewRulesCdnTrueClientIpHdr": "1",
             "rsIDSNewRulesCdnXForwardedForHdr": "1",
             "rsIDSNewRulesCdnForwardedHdr": "2",
@@ -925,7 +925,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesCdnHandlingSig": "2",
             "rsIDSNewRulesCdnHandlingSyn": "1",
             "rsIDSNewRulesCdnHandlingTF": "2",
-            "rsIDSNewRulesCdnAction": "1",
+            "rsIDSNewRulesCdnAction": "3",
             "rsIDSNewRulesCdnTrueClientIpHdr": list_of_cdn_option[2]["rsIDSNewRulesCdnTrueClientIpHdr"] if Behind_CDN == "Yes" else "1",
             "rsIDSNewRulesCdnXForwardedForHdr": list_of_cdn_option[1]["rsIDSNewRulesCdnXForwardedForHdr"] if Behind_CDN == "Yes" else "1",
             "rsIDSNewRulesCdnForwardedHdr": list_of_cdn_option[3]["rsIDSNewRulesCdnForwardedHdr"] if Behind_CDN == "Yes" else "1",
