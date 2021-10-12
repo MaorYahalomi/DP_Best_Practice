@@ -524,12 +524,18 @@ class Vision:
 def DP_config(vision_obj,dp_ip):
 
 	vision_obj.lock_device(dp_ip)
-	# vision_obj.net_class_config(dp_ip)
-	# vision_obj.Protection_config(dp_ip)
+	vision_obj.net_class_config(dp_ip)
+	vision_obj.Protection_config(dp_ip)
 	vision_obj.Policy_config(dp_ip)
 	vision_obj.update_policy(dp_ip)
 	time.sleep(3.0)
- 	
+
+def BP_Tool_run(vision_obj,DP_list):
+	start_runtime = timeit.default_timer()
+	for index in range(len(DP_list)):
+	 DP_config(vision_obj,DP_list[index])
+	stop_runtime = timeit.default_timer()
+	print('Running Time: ', stop_runtime - start_runtime)
 
 # MAIN Prog Tests#
 
@@ -544,19 +550,9 @@ if __name__ == "__main__":
 	Vision_password = "radware"
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
+	BP_Tool_run(vision_obj,DefensePro_list)
 	# DP_config(vision_obj, DefensePro_list[0])
-	# start_runtime = timeit.default_timer()
-	# for index in range(len(DefensePro_list)):
-	#  DP_config(vision_obj,DefensePro_list[index])
-	# stop_runtime = timeit.default_timer()
-	# print('Running Time: ', stop_runtime - start_runtime)
-
-
-	DP_config(vision_obj, DefensePro_list[0])
-
-
-# vision_obj.Delete_configuration(DefensePro_list[0])
-# vision_obj.Delete_configuration(DefensePro_list[1])
+	# vision_obj.Delete_configuration(DefensePro_list[0])
 
 
 #Check:
