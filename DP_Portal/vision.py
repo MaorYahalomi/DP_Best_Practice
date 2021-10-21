@@ -61,8 +61,8 @@ class Vision:
 			print(f"{BDoS_config_file[index]['rsNetFloodProfileName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
-	def DNS_SIG_config(self, dp_ip):
-		custom_dns_config_file = self.config_file.create_Custom_DNS_Singature_Profile_dic()
+	def DNS_SIG_config(self, dp_ip, custom_dns_config_file):
+		#custom_dns_config_file = self.config_file.create_Custom_DNS_Singature_Profile_dic()
 		profile_name = custom_dns_config_file[0][0]['rsIDSSignaturesProfileName']
 		print("DNS Custom Profile Configurations\n")
 
@@ -95,8 +95,8 @@ class Vision:
 
 		print("\n"+"*"*30+"\n")
 
-	def HTTP_SIG_config(self, dp_ip):
-		custom_http_config_file = self.config_file.create_Custom_HTTP_Singature_Profile_dic()
+	def HTTP_SIG_config(self, dp_ip, custom_http_config_file):
+		#custom_http_config_file = self.config_file.create_Custom_HTTP_Singature_Profile_dic()
 		profile_name = custom_http_config_file[0][0]['rsIDSSignaturesProfileName']
 		print("HTTP Custom Profile Configurations\n")
 
@@ -139,8 +139,8 @@ class Vision:
 
 		print("\n"+"*"*30+"\n")
 
-	def HTTPS_SIG_config(self, dp_ip):
-		custom_https_config_file = self.config_file.create_Custom_HTTPS_Singature_Profile_dic()
+	def HTTPS_SIG_config(self, dp_ip, custom_https_config_file):
+		# custom_https_config_file = self.config_file.create_Custom_HTTPS_Singature_Profile_dic()
 		profile_name = custom_https_config_file[0][0]['rsIDSSignaturesProfileName']
 		print("HTTPS Custom Profile Configurations\n")
 		url_https_service = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsIDSSignaturesProfilesTable/{profile_name}/1/Services/Web-HTTPS/"
@@ -182,8 +182,8 @@ class Vision:
 
 		print("\n"+"*"*30+"\n")
 
-	def Mail_SIG_config(self, dp_ip):
-		custom_mail_config_file = self.config_file.create_Custom_Mail_Singature_Profile_dic()
+	def Mail_SIG_config(self, dp_ip, custom_mail_config_file):
+		# custom_mail_config_file = self.config_file.create_Custom_Mail_Singature_Profile_dic()
 		profile_name = custom_mail_config_file[0][0]['rsIDSSignaturesProfileName']
 		print("Mail Custom Profile Configurations\n")
 
@@ -238,8 +238,8 @@ class Vision:
 
 		print("\n"+"*"*30+"\n")
 
-	def FTP_SIG_config(self, dp_ip):
-		custom_ftp_config_file = self.config_file.create_Custom_FTP_Singature_Profile_dic()
+	def FTP_SIG_config(self, dp_ip, custom_ftp_config_file):
+		# custom_ftp_config_file = self.config_file.create_Custom_FTP_Singature_Profile_dic()
 		profile_name = custom_ftp_config_file[0][0]['rsIDSSignaturesProfileName']
 		print("FTP Custom Profile Configurations\n")
 		url_ftp_service = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsIDSSignaturesProfilesTable/{profile_name}/1/Services/File%20Transfer-FTP/"
@@ -280,8 +280,22 @@ class Vision:
 			print(f"{OOS_config_file[index]['rsSTATFULProfileName']} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
-	def NTP_server_config(self, dp_ip):
-		NTP_config_file = self.config_file.create_ntp_config()
+	def EAAF_profile_config(self, dp_ip, EAAF_config_file):
+		#EAAF_config_file = self.config_file.create_ERT_Profile_dic()
+		profile_name = EAAF_config_file[0]['rsErtAttackersFeedProfileName']
+		print("EAAF Profile Configurations\n")
+		url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsErtAttackersFeedProfileTable/{profile_name}/"
+		eaaf_profile_body = json.dumps(EAAF_config_file[0])
+		response = self.session.post(url, data=eaaf_profile_body, verify=False)
+		if response.status_code == 200:
+			print(f"{profile_name} --> {response.status_code}")
+		elif response.status_code == 500:
+			print(json.loads(response.text)['message'])
+			#if "not found" in json.loads(response.text)['message'].split(':')[1]:
+		print("\n"+"*"*30+"\n")
+
+	def NTP_server_config(self, dp_ip, NTP_config_file):
+		# NTP_config_file = self.config_file.create_ntp_config()
 		print("NTP Server Configurations\n")
 		ntp_srv_url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config"
 		ntp_ip_body = json.dumps(NTP_config_file[0][0])
@@ -295,8 +309,8 @@ class Vision:
 		print(f" NTP Enable Response --> {ntp_enable_res.status_code}")
 		print("\n"+"*"*30+"\n")
 
-	def Syslog_server_config(self, dp_ip):
-		Syslog_config_file = self.config_file.create_syslog_config()
+	def Syslog_server_config(self, dp_ip, Syslog_config_file):
+		# Syslog_config_file = self.config_file.create_syslog_config()
 		print("Syslog Server Configurations\n")
 		for index in range(len(Syslog_config_file)):
 			sys_srv_url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rdwrSyslogServerTable/{Syslog_config_file[index]['rdwrSyslogServerAddress']}"
@@ -334,8 +348,8 @@ class Vision:
 
 		print("\n"+"*"*30+"\n")
                     
-	def DNS_Flood_profile_config(self, dp_ip):
-		DNS_config_file = self.config_file.create_DNS_Profile_dic()
+	def DNS_Flood_profile_config(self, dp_ip, DNS_config_file):
+		# DNS_config_file = self.config_file.create_DNS_Profile_dic()
 		print("DNS Profile Configurations\n")
 		for index in range(len(DNS_config_file)):
 			url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsDnsProtProfileTable/{DNS_config_file[index]['rsDnsProtProfileName']}/"
@@ -346,21 +360,25 @@ class Vision:
 
 	def AS_profile_config(self, dp_ip):
 
-		# Enable AS Global:
-		url_eanble_as = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config"
-		body_enable = {"rsIDSScanningMechanismStatus": "1"}
-		AS_enable_body = json.dumps(body_enable)
-		response = self.session.put(url_eanble_as, data=AS_enable_body, verify=False)
-		print(f"Enable AS Globally --> {response.status_code}")
-                    
-		AS_config_file = self.config_file.create_AS_Profile_dic()
-		print("Anti-Scan Profile Configurations\n")
-		for index in range(len(AS_config_file)):
-			url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsIDSScanningProfilesTable/{AS_config_file[index]['rsIDSScanningProfilesName']}/"
-			AS_profile_body = json.dumps(AS_config_file[index])
-			response = self.session.post(url, data=AS_profile_body, verify=False)
-			print(f"{AS_config_file[index]['rsIDSScanningProfilesName']} --> {response.status_code}")
-		print("\n"+"*"*30+"\n")
+		as_profile_flag = self.config_file.get_as_profile_status()
+		if as_profile_flag == "Yes":
+			# Enable AS Global:
+			url_eanble_as = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config"
+			body_enable = {"rsIDSScanningMechanismStatus": "1"}
+			AS_enable_body = json.dumps(body_enable)
+			response = self.session.put(url_eanble_as, data=AS_enable_body, verify=False)
+			print(f"Enable AS Globally --> {response.status_code}")
+						
+			AS_config_file = self.config_file.create_AS_Profile_dic()
+			print("Anti-Scan Profile Configurations\n")
+			for index in range(len(AS_config_file)):
+				url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsIDSScanningProfilesTable/{AS_config_file[index]['rsIDSScanningProfilesName']}/"
+				AS_profile_body = json.dumps(AS_config_file[index])
+				response = self.session.post(url, data=AS_profile_body, verify=False)
+				print(f"{AS_config_file[index]['rsIDSScanningProfilesName']} --> {response.status_code}")
+			print("\n"+"*"*30+"\n")
+		else:
+			print("AS Profile --> Disabled")
 
 	def ERT_profile_config(self, dp_ip):
 		ERT_config_file = self.config_file.create_ERT_Profile_dic()
@@ -414,40 +432,57 @@ class Vision:
 	  time.sleep(delay_time)
 
 	def Policy_config(self, dp_ip):
+
 		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
 		DNS_Singature_Profiles_Dict = self.config_file.create_Custom_DNS_Singature_Profile_dic()
 		FTP_Singature_Profiles_Dict = self.config_file.create_Custom_FTP_Singature_Profile_dic()
 		HTTP_Singature_Profiles_Dict = self.config_file.create_Custom_HTTP_Singature_Profile_dic()
 		HTTPS_Singature_Profiles_Dict = self.config_file.create_Custom_HTTPS_Singature_Profile_dic()
 		Mail_Singature_Profiles_Dict = self.config_file.create_Custom_Mail_Singature_Profile_dic()
-
 		DNS_Flood_Profiles_Dict = self.config_file.create_DNS_Profile_dic()
 		NTP_Flag = self.config_file.create_ntp_config()
+		EAAF_Profile = self.config_file.create_ERT_Profile_dic()
 		Syslog_Flag = self.config_file.create_syslog_config()
-		#Checks if Custom FTP Singature profile is requierd or not
+
+		#Checks if Custom FTP Singature profile is requierd 
 		if FTP_Singature_Profiles_Dict:
-			self.FTP_SIG_config(dp_ip)
-		#Checks if Custom HTTP Singature profile is requierd or not
+			self.FTP_SIG_config(dp_ip, FTP_Singature_Profiles_Dict)
+			time.sleep(1.5)
+		#Checks if Custom HTTP Singature profile is requierd 
 		if HTTP_Singature_Profiles_Dict:
-			self.HTTP_SIG_config(dp_ip)
-		#Checks if Custom HTTPS Singature profile is requierd or not
+			self.HTTP_SIG_config(dp_ip, HTTP_Singature_Profiles_Dict)
+			time.sleep(1.5)
+		#Checks if Custom HTTPS Singature profile is requierd 
 		if HTTPS_Singature_Profiles_Dict:
-			self.HTTPS_SIG_config(dp_ip)
-		#Checks if Custom Mail Singature profile is requierd or not
+			self.HTTPS_SIG_config(dp_ip, HTTPS_Singature_Profiles_Dict)
+			time.sleep(1.5)
+		#Checks if Custom Mail Singature profile is requierd 
 		if Mail_Singature_Profiles_Dict:
-			self.Mail_SIG_config(dp_ip)
-		#Checks if Custom DNS Singature profile is requierd or not
+			self.Mail_SIG_config(dp_ip, Mail_Singature_Profiles_Dict)
+			time.sleep(1.5)
+		#Checks if Custom DNS Singature profile is requierd 
 		if DNS_Singature_Profiles_Dict:
-			self.DNS_SIG_config(dp_ip)
-		#Checks if DNS Flood profile is requierd or not
+			self.DNS_SIG_config(dp_ip, DNS_Singature_Profiles_Dict)
+			time.sleep(1.5)
+		#Checks if DNS Flood profile is requierd 
 		if DNS_Flood_Profiles_Dict:
-			self.DNS_Flood_profile_config(dp_ip)
-		#Checks if NTP Server is requierd or not
+			self.DNS_Flood_profile_config(dp_ip, DNS_Flood_Profiles_Dict)
+			time.sleep(1.5)
+		#Checks if NTP Server is requierd 
 		if NTP_Flag:
-			self.NTP_server_config(dp_ip)
-		#Checks if Syslog Server is requierd or not
+			self.NTP_server_config(dp_ip, NTP_Flag)
+			time.sleep(1.5)
+		#Checks if Syslog Server is requierd 
 		if Syslog_Flag:
-			self.Syslog_server_config(dp_ip)
+			self.Syslog_server_config(dp_ip, Syslog_Flag)
+			time.sleep(1.5)
+		#Checks if EAAF Protection is requierd 
+		if EAAF_Profile:
+			self.EAAF_profile_config(dp_ip, EAAF_Profile)
+			time.sleep(1.5)
+		else:
+			print("EAAF Protection --> Disabled")
+
 		print("Policy Configurations Summary:\n")
 		print(f"Configure DP: {dp_ip}:\n")
 		for index in range(len(Policy_config_file)):
@@ -543,24 +578,12 @@ def BP_Tool_run(vision_obj,DP_list):
 
 if __name__ == "__main__":
 	
-	# Vision_IP = input("Enter Vision IP: ")
-	# Vision_user = input("Enter Vision User: ")
-	# Vision_password = getpass.getpass("Enter Vision Password: ")
-
-	Vision_IP = "10.213.17.49"
-	Vision_user = "radware"
-	Vision_password = "radware"
+	Vision_IP = input("Enter Vision IP: ")
+	Vision_user = input("Enter Vision User: ")
+	Vision_password = getpass.getpass("Enter Vision Password: ")
 
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
-	# BP_Tool_run(vision_obj,DefensePro_list)
-	# vision_obj.Del_Policy_config(DefensePro_list[0])
-	DP_config(vision_obj, DefensePro_list[0])
-	# DP_config(vision_obj, DefensePro_list[1])
-	# vision_obj.Delete_configuration(DefensePro_list[0])
-	# vision_obj.Delete_configuration(DefensePro_list[1])
+	BP_Tool_run(vision_obj,DefensePro_list)
 
-
-#Check:
-# https://10.213.17.49/mgmt/system/config/itemlist/devicesubscriptions
 

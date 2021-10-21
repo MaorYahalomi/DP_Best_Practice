@@ -186,22 +186,29 @@ class Config_Convertor_Handler:
         
         return AS_Profile_list
 
+    def get_as_profile_status(self):
+        as_profile = self.configuration_book.get_as_profile()
+        return as_profile
+
     def create_ERT_Profile_dic(self):
         # Function Description:
         # Creats List of dictorney ERT Profile configuration
-
+        eaaf_flag = self.configuration_book.get_eaaf_status()
         ERT_Profile_list = []
-        # ERT_Profile_xl_format = self.configuration_book.read_table(
-        #     "Policy Editor")
-        ERT_Profile_xl_format = self.policy_editor_book
+        if eaaf_flag == "Yes":
+         print("EAAF Protection --> Enabled")
+         ERT_Profile_list.append(create_single_ERT_dic())
+         return ERT_Profile_list
+        
+        # ERT_Profile_xl_format = self.policy_editor_book
 
-        for index in range(len(ERT_Profile_xl_format)):
-            Policy_Name = self.configuration_book.get_Policy_Name(
-                index)
-            if Policy_Name != False:
-               ERT_Profile_list.append(
-                   create_single_ERT_dic(Policy_Name))
-        return ERT_Profile_list    
+            # for index in range(len(ERT_Profile_xl_format)):
+            #     Policy_Name = self.configuration_book.get_Policy_Name(
+            #         index)
+            #     if Policy_Name != False:
+            #        ERT_Profile_list.append(
+            #            create_single_ERT_dic(Policy_Name))
+            # return ERT_Profile_list    
 
     def create_GEO_Profile_dic(self):
         # Function Description:
@@ -337,7 +344,6 @@ class Config_Convertor_Handler:
     def create_Protections_Per_Policy_dic(self):
         
         Policy_priorty = 10
-        signature_list = ["DoS-All", "Corp-DMZ-Web", "Corp-DMZ-Mail"]
         Protection_per_policy_list = []
         protections_xl_format = self.policy_editor_book
         symetric_flag = self.configuration_book.get_env_symetric_detalis()
@@ -366,7 +372,7 @@ class Config_Convertor_Handler:
                     elif application_type == "FTP":
                         signature_selected = "FTP_Custom"            
                     elif application_type == "Global":
-                        signature_selected = signature_list[0]
+                        signature_selected = "DoS-All"
 
                     Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag, as_profile, eaaf))
@@ -591,9 +597,9 @@ def create_single_DNS_dic(DNS_Profile_Name, Expect_QPS, Allow_Max):
     }
     return dns_profile_body
 
-def create_single_ERT_dic(ERT_Profile_name):
+def create_single_ERT_dic():
     ERT_profile_body = {
-        "rsErtAttackersFeedProfileName": f"{ERT_Profile_name}_auto_ERT",
+        "rsErtAttackersFeedProfileName": f"ERT_Custom",
         "rsErtAttackersFeedCatErtHighAction": "3",
         "rsErtAttackersFeedCatErtMediumAction": "1",
         "rsErtAttackersFeedCatErtLowAction": "1",
@@ -836,12 +842,12 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesPortmask": "",
             "rsIDSNewRulesDirection": "1",
             "rsIDSNewRulesVlanTagGroup": "",
-            "rsIDSNewRulesProfileScanning":  f"{Policy_Name}_auto_as" if symetric_flag == "Yes" and as_profile == "Yes" else "",
+            "rsIDSNewRulesProfileScanning": f"{Policy_Name}_auto_as" if symetric_flag == "Yes" and as_profile == "Yes" else "",
             "rsIDSNewRulesProfileNetflood": f"{Policy_Name}_auto_BDoS",
             "rsIDSNewRulesProfileConlmt": "",
             "rsIDSNewRulesProfilePpsRateLimit": "",
             "rsIDSNewRulesProfileDNS": "",
-            "rsIDSNewRulesProfileErtAttackersFeed": "",
+            "rsIDSNewRulesProfileErtAttackersFeed": f"ERT_Custom" if eaaf == "Yes" else "",
             "rsIDSNewRulesProfileGeoFeed": "",
             "rsIDSNewRulesProfileHttpsflood": "",
             "rsIDSNewRulesProfileStateful":  f"{Policy_Name}_auto_oos",
@@ -881,7 +887,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileConlmt": "",
             "rsIDSNewRulesProfilePpsRateLimit": "",
             "rsIDSNewRulesProfileDNS": f"{Policy_Name}_auto_DNS",
-            "rsIDSNewRulesProfileErtAttackersFeed": "",
+            "rsIDSNewRulesProfileErtAttackersFeed": f"ERT_Custom" if eaaf == "Yes" else "",
             "rsIDSNewRulesProfileGeoFeed": "",
             "rsIDSNewRulesProfileHttpsflood": "",
             "rsIDSNewRulesProfileStateful": "",
@@ -920,7 +926,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesProfileConlmt": "",
             "rsIDSNewRulesProfilePpsRateLimit": "",
             "rsIDSNewRulesProfileDNS": "",
-            "rsIDSNewRulesProfileErtAttackersFeed": "",
+            "rsIDSNewRulesProfileErtAttackersFeed": f"ERT_Custom" if eaaf == "Yes" else "",
             "rsIDSNewRulesProfileGeoFeed": "",
             "rsIDSNewRulesProfileHttpsflood": "",
             "rsIDSNewRulesProfileStateful":  f"{Policy_Name}_auto_oos",
