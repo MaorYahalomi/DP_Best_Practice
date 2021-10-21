@@ -406,6 +406,8 @@ class Vision:
 	  time.sleep(delay_time)
 	  self.OOS_profile_config(dp_ip)
 	  time.sleep(delay_time)
+	  self.AS_profile_config(dp_ip)
+	  time.sleep(delay_time)
 	  self.SYN_profile_config(dp_ip)
 	  time.sleep(delay_time)
 	  self.update_policy(dp_ip)
@@ -462,13 +464,13 @@ class Vision:
 		print("\n"+"*"*30+"\n")
 
 	def Del_Policy_config(self, dp_ip):
-		Policy_config_file = self.config_file.create_Protections_Per_Policy_dic()
-		# print("Policy Configurations\n")
-		for index in range(len(Policy_config_file)):
-			policy_name = Policy_config_file[index]["rsIDSNewRulesName"]
+		Policy_list = self.config_file.get_Policies_list()
+		print("Policy Configurations\n")
+		for index in range(len(Policy_list)):
+			policy_name = Policy_list[index]
 			url = f"https://{self.ip}/mgmt/device/byip/{dp_ip}/config/rsIDSNewRulesTable/{policy_name}/"
 			response = self.session.delete(url, verify=False)
-			print(f"Delete Policy: {Policy_config_file[index]['rsIDSNewRulesName']} --> {response.status_code}")
+			print(f"Delete Policy: {Policy_list[index]} --> {response.status_code}")
 		print("\n"+"*"*30+"\n")
 
 	def Del_BdoS_config(self, dp_ip):
@@ -541,18 +543,19 @@ def BP_Tool_run(vision_obj,DP_list):
 
 if __name__ == "__main__":
 	
-	Vision_IP = input("Enter Vision IP: ")
-	Vision_user = input("Enter Vision User: ")
-	Vision_password = getpass.getpass("Enter Vision Password: ")
+	# Vision_IP = input("Enter Vision IP: ")
+	# Vision_user = input("Enter Vision User: ")
+	# Vision_password = getpass.getpass("Enter Vision Password: ")
 
-	# Vision_IP = "10.213.17.49"
-	# Vision_user = "radware"
-	# Vision_password = "radware"
+	Vision_IP = "10.213.17.49"
+	Vision_user = "radware"
+	Vision_password = "radware"
+
 	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
 	DefensePro_list = vision_obj.config_file.get_dp_list()
-	BP_Tool_run(vision_obj,DefensePro_list)
-
-	# DP_config(vision_obj, DefensePro_list[0])
+	# BP_Tool_run(vision_obj,DefensePro_list)
+	# vision_obj.Del_Policy_config(DefensePro_list[0])
+	DP_config(vision_obj, DefensePro_list[0])
 	# DP_config(vision_obj, DefensePro_list[1])
 	# vision_obj.Delete_configuration(DefensePro_list[0])
 	# vision_obj.Delete_configuration(DefensePro_list[1])

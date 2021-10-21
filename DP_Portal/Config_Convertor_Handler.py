@@ -9,7 +9,7 @@ from Excel_Handler import Excel_Handler
 
 class Config_Convertor_Handler:
     def __init__(self):
-        self.configuration_book = Excel_Handler("server_test.xlsm")
+        self.configuration_book = Excel_Handler("config_file.xlsm")
         self.policy_editor_book = self.configuration_book.read_table("Policy Editor")
         self.network_class_book = self.configuration_book.read_table("Network Classes")
         self.general_config_book = self.configuration_book.read_table("Global Information")
@@ -64,16 +64,16 @@ class Config_Convertor_Handler:
     def create_ntp_config(self):
         
         NTP_config_list = []
-        NTP_config_xl_format = self.general_config_book
-        NTP_IP = self.configuration_book.get_ntp_server(0)
-        NTP_IP_body,NTP_enalbe_body = create_ntp_srv_body(NTP_IP)
+        # NTP_config_xl_format = self.general_config_book
+        NTP_IP = self.configuration_book.get_ntp_server()
+        # NTP_IP_body,NTP_enalbe_body = create_ntp_srv_body(NTP_IP)
         NTP_config_list.append(create_ntp_srv_body(NTP_IP))
         return NTP_config_list
 
     def create_syslog_config(self):
 
         Syslog_config_list = []
-        Syslog_IP = self.configuration_book.get_syslog_server(0)
+        Syslog_IP = self.configuration_book.get_syslog_server()
         list_of_IP = Syslog_IP.split(",")
         for index in range(len(list_of_IP)):
          Syslog_config_list.append(create_syslog_srv_body(list_of_IP[index]))
@@ -81,8 +81,6 @@ class Config_Convertor_Handler:
 
     def create_BDoS_Profile_dic(self):
         BDoS_Profile_list = []
-        # net_class_xl_format = self.configuration_book.read_table(
-        #     "Policy Editor")
         BDoS_Pro_xl_format = self.policy_editor_book
 
         for index in range(len(BDoS_Pro_xl_format)):
@@ -178,14 +176,14 @@ class Config_Convertor_Handler:
        
         AS_Profile_xl_format = self.policy_editor_book
         symetric_flag = self.configuration_book.get_env_symetric_detalis()
+        as_profile = self.configuration_book.get_as_profile()
         for index in range(len(AS_Profile_xl_format)):
-            Application_type = self.configuration_book.get_application_type(
-                index)
-            Policy_Name = self.configuration_book.get_Policy_Name(
-                index)
-            if Policy_Name != False and Application_type != "Global" and symetric_flag == "Yes":
+            Application_type = self.configuration_book.get_application_type(index)
+            Policy_Name = self.configuration_book.get_Policy_Name(index)
+            if Policy_Name != False and symetric_flag == "Yes" and as_profile == "Yes":
                AS_Profile_list.append(
                    create_single_AS_dic(Policy_Name))
+        
         return AS_Profile_list
 
     def create_ERT_Profile_dic(self):
@@ -343,6 +341,9 @@ class Config_Convertor_Handler:
         Protection_per_policy_list = []
         protections_xl_format = self.policy_editor_book
         symetric_flag = self.configuration_book.get_env_symetric_detalis()
+        as_profile = self.configuration_book.get_as_profile()
+        eaaf = self.configuration_book.get_eaaf_status()
+
         for index in range(len(protections_xl_format)):
 
             application_type = self.configuration_book.get_application_type(
@@ -355,7 +356,6 @@ class Config_Convertor_Handler:
             if Policy_Name != False:
                 policy_type = protection_per_policy_check(self.configuration_book.get_application_type(index))
                 if policy_type == "basic_app" or policy_type == "Global":
-                    # print(application_type)
                     #Basic Application Policy Section:
                     if application_type == "HTTP":
                         signature_selected = "HTTP_Custom"
@@ -369,12 +369,12 @@ class Config_Convertor_Handler:
                         signature_selected = signature_list[0]
 
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag, as_profile, eaaf))
 
                 if policy_type == "DNS_app":
                     signature_selected = "DNS_Custom"
                     Protection_per_policy_list.append(
-                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag))
+                        create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag, as_profile, eaaf))
             Policy_priorty +=10
         #print(Protection_per_policy_list)
         return Protection_per_policy_list
@@ -382,6 +382,13 @@ class Config_Convertor_Handler:
     def get_dp_list(self):
         DP_list = self.configuration_book.get_DP_IP_detalis()
         return DP_list
+
+    def get_Policies_list(self):
+        list_of_policies = []
+        DP_Policy_list = self.policy_editor_book
+        for i in range(len(DP_Policy_list)):
+            list_of_policies.append(f'{DP_Policy_list[i]["Policy Name"]}_BP')
+        return list_of_policies
 
 def create_single_Syn_dic(Syn_Profile_name, application_type,Global_syn_flag):
         
@@ -814,7 +821,7 @@ def protection_per_policy_check(application_type):
         app_type_response = "Global"
         return app_type_response
 
-def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net, Behind_CDN, CDN_Method, symetric_flag):
+def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signature_profile, Dest_net, Behind_CDN, CDN_Method, symetric_flag,as_profile,eaaf):
     
     if Behind_CDN == "Yes":
         list_of_cdn_option = Create_CDN_Option_Dict(CDN_Method)
@@ -829,7 +836,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
             "rsIDSNewRulesPortmask": "",
             "rsIDSNewRulesDirection": "1",
             "rsIDSNewRulesVlanTagGroup": "",
-            "rsIDSNewRulesProfileScanning": "",
+            "rsIDSNewRulesProfileScanning":  f"{Policy_Name}_auto_as" if symetric_flag == "Yes" and as_profile == "Yes" else "",
             "rsIDSNewRulesProfileNetflood": f"{Policy_Name}_auto_BDoS",
             "rsIDSNewRulesProfileConlmt": "",
             "rsIDSNewRulesProfilePpsRateLimit": "",
@@ -1016,9 +1023,11 @@ def create_syslog_srv_body(syslog_IP):
     return Syslog_body
 
 
-#Testing
-    # d1 = Config_Convertor_Handler()
-    #d1.create_ntp_config()
-    #d1.print_table("Network Classes")
-    #d1.create_net_class_list()
-    # d1.create_AS_Profile_dic()
+
+# d1 = Config_Convertor_Handler()
+# d1.create_AS_Profile_dic()
+# # d1.get_Policies_list()
+#     #d1.create_ntp_config()
+#     #d1.print_table("Network Classes")
+#     #d1.create_net_class_list()
+#     # d1.create_AS_Profile_dic()

@@ -77,17 +77,33 @@ class Excel_Handler:
         else:
             return False
 
-    def get_ntp_server(self, index):
+    def get_ntp_server(self):
         xl_format = self.read_table("Global Information")
-        ntp_ip = xl_format[index]["NTP Server"]
+        ntp_ip = xl_format[0]["NTP Server"]
         if pd.isna(ntp_ip) == False:
             return ntp_ip
         else:
             return False
 
-    def get_syslog_server(self, index):
+    def get_as_profile(self):
         xl_format = self.read_table("Global Information")
-        syslog_ip = xl_format[index]["Syslog Server"]
+        as_pro = xl_format[0]["AS Profile"]
+        if pd.isna(as_pro) == False:
+            return as_pro
+        else:
+            return False
+
+    def get_eaaf_status(self):
+        xl_format = self.read_table("Global Information")
+        eaaf = xl_format[0]["EAAF subscription enabled"]
+        if pd.isna(eaaf) == False:
+            return eaaf
+        else:
+            return False
+
+    def get_syslog_server(self):
+        xl_format = self.read_table("Global Information")
+        syslog_ip = xl_format[0]["Syslog Server"]
         if pd.isna(syslog_ip) == False:
             return syslog_ip
         else:
@@ -108,9 +124,9 @@ class Excel_Handler:
         return multi_net_dic
 
     def get_BDoS_profile_details(self,index):
-        net_class_xl_format = self.read_table("Policy Editor")
-        BDoS_profile_name = net_class_xl_format[index]["Policy Name"]
-        BDoS_profile_BW= net_class_xl_format[index]["Policy BW"]
+        xl_format = self.read_table("Policy Editor")
+        BDoS_profile_name = xl_format[index]["Policy Name"]
+        BDoS_profile_BW = xl_format[index]["Policy BW"]
         return BDoS_profile_name, BDoS_profile_BW
     
     def get_DNS_profile_details(self,index):
@@ -121,7 +137,8 @@ class Excel_Handler:
         return DNS_profile_name, DNS_Expected_QPS, DNS_Max_QPS
 
 
-v1 = Excel_Handler("server_test.xlsm")
-#v1.create_net_class_dic()
-#v1.get_BDoS_profile_details()
-v1.get_env_symetric_detalis()
+# v1 = Excel_Handler("config_file.xlsm")
+# #v1.create_net_class_dic()
+# #v1.get_BDoS_profile_details()
+# #v1.get_env_symetric_detalis()
+# # v1.get_as_profile()
