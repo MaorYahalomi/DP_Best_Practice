@@ -1,4 +1,4 @@
-VISION_LOGIN_ERROR = "invalid username/password"
+VISION_LOGIN_ERROR = "Invalid username/password"
 
 
 class Error_handler(Exception):

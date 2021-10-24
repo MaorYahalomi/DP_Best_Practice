@@ -9,7 +9,7 @@ from Excel_Handler import Excel_Handler
 
 class Config_Convertor_Handler:
     def __init__(self):
-        self.configuration_book = Excel_Handler("config_file.xlsm")
+        self.configuration_book = Excel_Handler("./Workbook/config_file.xlsm")
         self.policy_editor_book = self.configuration_book.read_table("Policy Editor")
         self.network_class_book = self.configuration_book.read_table("Network Classes")
         self.general_config_book = self.configuration_book.read_table("Global Information")

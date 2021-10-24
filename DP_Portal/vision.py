@@ -31,15 +31,15 @@ class Vision:
 
 		if response['status'] == 'ok':
 			self.session.headers.update({"JSESSIONID": response['jsessionid']})
-			print("Auth Cookie is:  " + response['jsessionid'])
-			print(r.status_code)
+			#print("Auth Cookie is:  " + response['jsessionid'])
+			#print(r.status_code)
+			print("Login to Vision was successful")
 			return str(r.status_code)
 		else:
 			# Error handling to be completed
 			raise Error_handler(VISION_LOGIN_ERROR)
 
 	def lock_device(self,dp_ip):
-		dp_list = self.config_file.get_dp_list()
 		url = f"https://{self.ip}/mgmt/system/config/tree/device/byip/{dp_ip}/lock"
 		response = self.session.post(url, verify=False)
 		print(f"Lock Device {dp_ip} --> {response.status_code}")
@@ -582,7 +582,12 @@ if __name__ == "__main__":
 	Vision_user = input("Enter Vision User: ")
 	Vision_password = getpass.getpass("Enter Vision Password: ")
 
-	vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
+	try:
+		vision_obj = Vision(Vision_IP, Vision_user, Vision_password)
+	except FileNotFoundError:
+		print(f"Error: Config File is not Found")
+		exit(1)
+            
 	DefensePro_list = vision_obj.config_file.get_dp_list()
 	BP_Tool_run(vision_obj,DefensePro_list)
 
