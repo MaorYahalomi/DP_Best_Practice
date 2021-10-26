@@ -550,7 +550,7 @@ def create_single_BDoS_dic(BDoS_Profile_Name, BDoS_Profile_BW):
   						"rsNetFloodProfileNoBurstTimeout": "30",
   						"rsNetFloodProfileOverMitigationStatus": "2",
   						"rsNetFloodProfileOverMitigationThreshold": "25",
-  						"rsNetFloodProfileLearningSuppressionThreshold": "0",
+  						"rsNetFloodProfileLearningSuppressionThreshold": "25",
   						"rsNetFloodProfileFootprintStrictness": "1",
   						"rsNetFloodProfileRateLimit": "0",
   						"rsNetFloodProfileUserDefinedRateLimit": "0",
@@ -592,7 +592,7 @@ def create_single_DNS_dic(DNS_Profile_Name, Expect_QPS, Allow_Max):
         "rsDnsProtProfileManualTriggerTermPeriod": "3",
         "rsDnsProtProfileManualTriggerMaxQpsTarget": "0",
         "rsDnsProtProfileManualTriggerEscalatePeriod": "3",
-        "rsDnsProtProfileLearningSuppressionThreshold": "0",
+        "rsDnsProtProfileLearningSuppressionThreshold": "20",
         "rsDnsProtProfileFootprintStrictness": "1"
     }
     return dns_profile_body
@@ -835,7 +835,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         Policy_basic_body = {
             "rsIDSNewRulesState": "1",
             "rsIDSNewRulesName": f"{Policy_Name}_BP",
-            "rsIDSNewRulesAction": "1",
+            "rsIDSNewRulesAction": "0",
             "rsIDSNewRulesPriority": policy_Priority,
             "rsIDSNewRulesSource": "any",
             "rsIDSNewRulesDestination": f"{Dest_net}_auto",
@@ -875,7 +875,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         Policy_DNS_body= {
             "rsIDSNewRulesState": "1",
             "rsIDSNewRulesName": f"{Policy_Name}_BP",
-            "rsIDSNewRulesAction": "1",
+            "rsIDSNewRulesAction": "0",
             "rsIDSNewRulesPriority": policy_Priority,
             "rsIDSNewRulesSource": "any",
             "rsIDSNewRulesDestination":f"{Dest_net}_auto",
@@ -914,7 +914,7 @@ def create_single_Policy_dic(Policy_Name, policy_type, policy_Priority, signatur
         Policy_basic_body = {
             "rsIDSNewRulesState": "1",
             "rsIDSNewRulesName": f"{Policy_Name}_BP",
-            "rsIDSNewRulesAction": "1",
+            "rsIDSNewRulesAction": "0",
             "rsIDSNewRulesPriority": "1",
             "rsIDSNewRulesSource": "any",
             "rsIDSNewRulesDestination": f"{Dest_net}_auto",
