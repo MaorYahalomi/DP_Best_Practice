@@ -28,7 +28,17 @@ class Excel_Handler:
             return application_type
         else:
             return False
-    
+
+    def get_policy_priorirty(self, index):
+        xl_format = self.read_table("Policy Editor")
+        policy_name = xl_format[index]["Policy Name"]
+        policy_priority = xl_format[index]["Priority"]
+        #Checks if the value is not NAN
+        if pd.isna(policy_name) == False:
+            return policy_name,policy_priority
+        else:
+            return False
+
     def get_DP_IP_detalis(self):
         dp_list_type_xl_format = self.read_table("Global Information")
         DP_IP_List = []
@@ -142,3 +152,4 @@ class Excel_Handler:
 # #v1.get_BDoS_profile_details()
 # #v1.get_env_symetric_detalis()
 # # v1.get_as_profile()
+# v1.get_policy_priorirty(1)

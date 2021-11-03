@@ -64,9 +64,7 @@ class Config_Convertor_Handler:
     def create_ntp_config(self):
         
         NTP_config_list = []
-        # NTP_config_xl_format = self.general_config_book
         NTP_IP = self.configuration_book.get_ntp_server()
-        # NTP_IP_body,NTP_enalbe_body = create_ntp_srv_body(NTP_IP)
         NTP_config_list.append(create_ntp_srv_body(NTP_IP))
         return NTP_config_list
 
@@ -78,6 +76,20 @@ class Config_Convertor_Handler:
         for index in range(len(list_of_IP)):
          Syslog_config_list.append(create_syslog_srv_body(list_of_IP[index]))
         return Syslog_config_list
+
+    def Policy_Priority_list(self):
+        Policy_priority_list = []
+        xl_format = self.policy_editor_book
+        # print(xl_format)
+        for index in range(len(xl_format)):
+            Policy_Name, Policy_priority = self.configuration_book.get_policy_priorirty(index)
+            if Policy_Name != False:
+                try:
+                    if math.isnan(Policy_priority) == False:
+                        Policy_priority_list.append((Policy_Name, int(Policy_priority)))
+                except TypeError:
+                     print(f"TypeError: Policy Priority Must enter a valid number --> in {Policy_Name}.")
+        return Policy_priority_list
 
     def create_BDoS_Profile_dic(self):
         BDoS_Profile_list = []
@@ -343,12 +355,14 @@ class Config_Convertor_Handler:
        
     def create_Protections_Per_Policy_dic(self):
         
-        Policy_priorty = 10
         Protection_per_policy_list = []
         protections_xl_format = self.policy_editor_book
         symetric_flag = self.configuration_book.get_env_symetric_detalis()
         as_profile = self.configuration_book.get_as_profile()
         eaaf = self.configuration_book.get_eaaf_status()
+        Custom_Policy_priorty = self.Policy_Priority_list()
+        Default_Policy_priorty = 10
+        Custom_Policy_priorty_flag = 0
 
         for index in range(len(protections_xl_format)):
 
@@ -360,6 +374,18 @@ class Config_Convertor_Handler:
             dest_net_per_policy = protections_xl_format[index]["DST Networks Name"]
 
             if Policy_Name != False:
+
+                # Policy Priority Configuration:
+                for index in range(len(Custom_Policy_priorty)):
+                    if Policy_Name == Custom_Policy_priorty[index][0]:
+                        if Custom_Policy_priorty[index][1] != 0:
+                            Policy_priorty = Custom_Policy_priorty[index][1]
+                            Custom_Policy_priorty_flag = 1
+                            break
+                        else:
+                            Policy_priorty = Default_Policy_priorty
+                            break
+
                 policy_type = protection_per_policy_check(self.configuration_book.get_application_type(index))
                 if policy_type == "basic_app" or policy_type == "Global":
                     #Basic Application Policy Section:
@@ -381,8 +407,12 @@ class Config_Convertor_Handler:
                     signature_selected = "DNS_Custom"
                     Protection_per_policy_list.append(
                         create_single_Policy_dic(Policy_Name, policy_type, Policy_priorty, signature_selected, dest_net_per_policy, CDN_Flag, CDN_Method, symetric_flag, as_profile, eaaf))
-            Policy_priorty +=10
-        #print(Protection_per_policy_list)
+            
+            if Custom_Policy_priorty_flag == 1:
+                Custom_Policy_priorty_flag = 0
+            elif Policy_Name != "Global":
+                Default_Policy_priorty += 10
+                
         return Protection_per_policy_list
 
     def get_dp_list(self):
@@ -444,35 +474,26 @@ def create_single_Syn_spoof_dic(Syn_Profile_name):
 
     return syn_spoof_profile_body
 
-def create_single_Syn_App(application_type):
+# def create_single_Syn_App(application_type):
     
-    # For Clean DP Installtion
-    # if application_type == "Mail":
-    #     app_port = "smtp"
-    #     attack_id = "500001"
-    # if application_type == "DNS":
-    #     app_port = "dns"
-    #     attack_id = "500002"
-    
-    #Other for test:
-    if application_type == "Mail":
-        app_port = "smtp"
-        attack_id = "500013"
-    if application_type == "DNS":
-        app_port = "dns"
-        attack_id = "500013"
+    #     if application_type == "Mail":
+    #         app_port = "smtp"
+    #         attack_id = "500013"
+    #     if application_type == "DNS":
+    #         app_port = "dns"
+    #         attack_id = "500013"
 
-    application_body = {
-        "rsIDSSYNAttackName": application_type,
-        "rsIDSSYNAttackId": attack_id,
-        "rsIDSSYNAttackSourceType": "3",
-        "rsIDSSYNDestinationAppPortGroup": app_port,
-        "rsIDSSYNAttackActivationThreshold": "2500",
-        "rsIDSSYNAttackTerminationThreshold": "1500",
-        "rsIDSSYNAttackRisk": "2"
-    }
+    #     application_body = {
+    #         "rsIDSSYNAttackName": application_type,
+    #         "rsIDSSYNAttackId": attack_id,
+    #         "rsIDSSYNAttackSourceType": "3",
+    #         "rsIDSSYNDestinationAppPortGroup": app_port,
+    #         "rsIDSSYNAttackActivationThreshold": "2500",
+    #         "rsIDSSYNAttackTerminationThreshold": "1500",
+    #         "rsIDSSYNAttackRisk": "2"
+    #     }
 
-    return application_body
+    #     return application_body
 
 def create_single_AS_dic(AS_Profile_name):
 

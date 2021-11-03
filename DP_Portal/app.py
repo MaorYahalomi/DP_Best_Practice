@@ -1,7 +1,5 @@
 import getpass
 from vision import *
-#from vision import BP_Tool_run
-# MAIN Prog Tests#
 
 if __name__ == "__main__":
 
