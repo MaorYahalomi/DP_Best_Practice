@@ -34,31 +34,30 @@ class Config_Convertor_Handler:
         for index in range(len(net_class_xl_format)):
 
             network_name, network_subnet, network_mask = self.configuration_book.get_network_entry_details(index)
+            if network_name != "Empty Slot":
+                for net_name_key in multi_net_dic.keys():
+                    #IF There is a netowrk call with multiple sub-indexes:
+                    if network_name == net_name_key and key_found_sub_index == 0:
+                        key_found_sub_index = 1
+                        sub_index = 0
+                        multi_sub_index = multi_net_dic[net_name_key]
+                        key_to_remove = net_name_key
 
-            for net_name_key in multi_net_dic.keys():
-                #IF There is a netowrk call with multiple sub-indexes:
-                if network_name == net_name_key and key_found_sub_index == 0:
-                    key_found_sub_index = 1
+                if key_found_sub_index == 1:
+                    #Remove the Entry with sub-indexes from dictionary.
+                    multi_net_dic.pop(key_to_remove)
+                key_found_sub_index = 0
+
+                if sub_index < multi_sub_index:
+                    net_class_list.append(create_single_net_dic(
+                        network_name, network_subnet, sub_index, network_mask))
+                    sub_index += 1
+                else:
+                    # Network Class with only 1 Entry:
                     sub_index = 0
-                    multi_sub_index = multi_net_dic[net_name_key]
-                    key_to_remove = net_name_key
-
-            if key_found_sub_index == 1:
-                #Remove the Entry with sub-indexes from dictionary.
-                multi_net_dic.pop(key_to_remove)
-            key_found_sub_index = 0
-
-            if sub_index < multi_sub_index:
-                net_class_list.append(create_single_net_dic(
-                    network_name, network_subnet, sub_index, network_mask))
-                sub_index += 1
-            else:
-                # Network Class with only 1 Entry:
-                sub_index = 0
-                net_class_list.append(create_single_net_dic(
-                    network_name, network_subnet, sub_index, network_mask))
+                    net_class_list.append(create_single_net_dic(
+                        network_name, network_subnet, sub_index, network_mask))
                         
-        #print(list_of_net)
         return net_class_list
 
     def create_ntp_config(self):
@@ -80,13 +79,14 @@ class Config_Convertor_Handler:
     def Policy_Priority_list(self):
         Policy_priority_list = []
         xl_format = self.policy_editor_book
-        # print(xl_format)
+        #print(xl_format)
         for index in range(len(xl_format)):
-            Policy_Name, Policy_priority = self.configuration_book.get_policy_priorirty(index)
+            Policy_Name = self.configuration_book.get_Policy_Name(index)
             if Policy_Name != False:
+                Policy, Policy_priority = self.configuration_book.get_policy_priorirty(index)
                 try:
                     if math.isnan(Policy_priority) == False:
-                        Policy_priority_list.append((Policy_Name, int(Policy_priority)))
+                        Policy_priority_list.append((Policy, int(Policy_priority)))
                 except TypeError:
                      print(f"TypeError: Policy Priority Must enter a valid number --> in {Policy_Name}.")
         return Policy_priority_list
@@ -473,27 +473,6 @@ def create_single_Syn_spoof_dic(Syn_Profile_name):
        }
 
     return syn_spoof_profile_body
-
-# def create_single_Syn_App(application_type):
-    
-    #     if application_type == "Mail":
-    #         app_port = "smtp"
-    #         attack_id = "500013"
-    #     if application_type == "DNS":
-    #         app_port = "dns"
-    #         attack_id = "500013"
-
-    #     application_body = {
-    #         "rsIDSSYNAttackName": application_type,
-    #         "rsIDSSYNAttackId": attack_id,
-    #         "rsIDSSYNAttackSourceType": "3",
-    #         "rsIDSSYNDestinationAppPortGroup": app_port,
-    #         "rsIDSSYNAttackActivationThreshold": "2500",
-    #         "rsIDSSYNAttackTerminationThreshold": "1500",
-    #         "rsIDSSYNAttackRisk": "2"
-    #     }
-
-    #     return application_body
 
 def create_single_AS_dic(AS_Profile_name):
 
@@ -1051,10 +1030,11 @@ def create_syslog_srv_body(syslog_IP):
 
 
 
-# d1 = Config_Convertor_Handler()
+d1 = Config_Convertor_Handler()
 # d1.create_AS_Profile_dic()
 # # d1.get_Policies_list()
 #     #d1.create_ntp_config()
 #     #d1.print_table("Network Classes")
 #     #d1.create_net_class_list()
 #     # d1.create_AS_Profile_dic()
+d1.Policy_Priority_list()
